@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Pencil, Trash2, MapPin, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,7 @@ const typeLabels: Record<BlockType, string> = {
   education: "Education",
   skill: "Skill",
   volunteering: "Volunteering",
+  research: "Research",
 };
 
 const typeBadgeColors: Record<BlockType, string> = {
@@ -21,6 +23,7 @@ const typeBadgeColors: Record<BlockType, string> = {
   education: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
   skill: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
   volunteering: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
+  research: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300",
 };
 
 function formatDateRange(startDate: string | null, endDate: string | null): string | null {
@@ -45,6 +48,26 @@ interface BlockCardProps {
 
 export function BlockCard({ block, onDelete }: BlockCardProps) {
   const dateRange = formatDateRange(block.start_date, block.end_date);
+  const [confirming, setConfirming] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (confirming) {
+      timerRef.current = setTimeout(() => setConfirming(false), 3000);
+    }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [confirming]);
+
+  function handleTrashClick() {
+    if (!onDelete) return;
+    if (confirming) {
+      onDelete(block.id);
+    } else {
+      setConfirming(true);
+    }
+  }
 
   return (
     <Card className="group relative">
@@ -59,7 +82,12 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
             </Badge>
             <CardTitle className="text-base">{block.title}</CardTitle>
           </div>
-          <div className="flex shrink-0 gap-1">
+          <div className="flex shrink-0 items-center gap-1">
+            {confirming && (
+              <span className="animate-in fade-in text-xs font-medium text-destructive">
+                Delete?
+              </span>
+            )}
             <Button variant="ghost" size="icon-xs" asChild>
               <Link href={`/blocks/${block.id}/edit`}>
                 <Pencil />
@@ -67,11 +95,11 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
             </Button>
             {onDelete && (
               <Button
-                variant="ghost"
+                variant={confirming ? "destructive" : "ghost"}
                 size="icon-xs"
-                onClick={() => onDelete(block.id)}
+                onClick={handleTrashClick}
               >
-                <Trash2 className="text-destructive" />
+                <Trash2 />
               </Button>
             )}
           </div>

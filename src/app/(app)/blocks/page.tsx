@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import useSWR from "swr";
+import { toast } from "sonner";
 import { Plus, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,7 +12,17 @@ import type { ExperienceBlock } from "@/types/blocks";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function BlocksPage() {
-  const { data, isLoading } = useSWR<ExperienceBlock[]>("/api/blocks", fetcher);
+  const { data, isLoading, mutate } = useSWR<ExperienceBlock[]>("/api/blocks", fetcher);
+
+  async function handleDelete(id: string) {
+    try {
+      await fetch(`/api/blocks/${id}`, { method: "DELETE" });
+      mutate((prev) => prev?.filter((b) => b.id !== id));
+      toast.success("Block deleted");
+    } catch {
+      toast.error("Failed to delete block");
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -46,7 +57,7 @@ export default function BlocksPage() {
           ))}
         </div>
       ) : (
-        <BlockList blocks={Array.isArray(data) ? data : []} />
+        <BlockList blocks={Array.isArray(data) ? data : []} onDelete={handleDelete} />
       )}
     </div>
   );

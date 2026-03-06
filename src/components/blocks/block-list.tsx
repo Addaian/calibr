@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Inbox } from "lucide-react";
+import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BlockCard } from "@/components/blocks/block-card";
 import type { ExperienceBlock, BlockType } from "@/types/blocks";
@@ -17,9 +18,10 @@ const filterTabs: { value: string; label: string }[] = [
 
 interface BlockListProps {
   blocks: ExperienceBlock[];
+  onDelete?: (id: string) => void;
 }
 
-export function BlockList({ blocks }: BlockListProps) {
+export function BlockList({ blocks, onDelete }: BlockListProps) {
   const [activeTab, setActiveTab] = useState("all");
 
   const filteredBlocks =
@@ -54,7 +56,7 @@ export function BlockList({ blocks }: BlockListProps) {
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredBlocks.map((block) => (
-                <BlockCard key={block.id} block={block} />
+                <BlockCard key={block.id} block={block} onDelete={onDelete} />
               ))}
             </div>
           )}
