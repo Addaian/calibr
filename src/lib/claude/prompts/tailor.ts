@@ -1,6 +1,7 @@
 export function getTailorPrompt(
   blocks: string,
-  jobPosting: string
+  jobPosting: string,
+  resumeTemplate?: string
 ): { system: string; user: string } {
   return {
     system: `You are an expert resume tailoring assistant. Your job is to take a set of experience blocks and a job posting, then produce an optimized resume by:
@@ -34,6 +35,6 @@ Return ONLY valid JSON matching this exact schema:
     }
   ]
 }`,
-    user: `Here are the experience blocks:\n\n${blocks}\n\nHere is the job posting:\n\n${jobPosting}\n\nTailor the resume by selecting the best blocks and rewriting bullet points to match this job. Return only JSON.`,
+    user: `Here are the experience blocks:\n\n${blocks}\n\nHere is the job posting:\n\n${jobPosting}${resumeTemplate ? `\n\nHere is an example of the user's existing resume. Use it as a stylistic reference — mirror the tone, phrasing style, and level of detail in the bullet points:\n\n${resumeTemplate}` : ""}\n\nTailor the resume by selecting the best blocks and rewriting bullet points to match this job. Return only JSON.`,
   };
 }

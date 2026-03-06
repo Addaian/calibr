@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { block_ids, job_posting_id } = parsed.data;
+    const { block_ids, job_posting_id, resume_template_text } = parsed.data;
 
     const [blocksResult, jobResult] = await Promise.all([
       supabase
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
 
     const blocksText = JSON.stringify(blocksResult.data, null, 2);
     const jobText = JSON.stringify(jobResult.data, null, 2);
-    const prompt = getTailorPrompt(blocksText, jobText);
+    const prompt = getTailorPrompt(blocksText, jobText, resume_template_text);
 
     const claude = getClaudeClient();
     const message = await claude.messages.create({

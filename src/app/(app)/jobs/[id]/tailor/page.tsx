@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import Link from "next/link";
@@ -13,7 +13,7 @@ import { FitScoreDisplay } from "@/components/tailor/fit-score-display";
 import type { ExperienceBlock } from "@/types/blocks";
 import type { JobPosting } from "@/types/jobs";
 import type { GeneratedResume } from "@/types/resumes";
-import { ArrowLeft, ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Sparkles, Upload, X, FileText } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -25,17 +25,51 @@ export default function TailorPage() {
   const { data: job } = useSWR<JobPosting>(`/api/jobs/${jobId}`, fetcher);
   const { data: blocks } = useSWR<ExperienceBlock[]>("/api/blocks", fetcher);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(0);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [tailoring, setTailoring] = useState(false);
   const [scoringLoading, setScoringLoading] = useState(false);
   const [resume, setResume] = useState<GeneratedResume | null>(null);
+  const [templateFile, setTemplateFile] = useState<File | null>(null);
+  const [templateText, setTemplateText] = useState<string | null>(null);
+  const [templateLoading, setTemplateLoading] = useState(false);
   const [fitScore, setFitScore] = useState<{
     score: number;
     pros: string[];
     cons: string[];
     suggestions: string[];
   } | null>(null);
+
+  async function handleTemplateUpload(file: File) {
+    if (file.type !== "application/pdf") {
+      toast.error("Only PDF files are supported");
+      return;
+    }
+    setTemplateFile(file);
+    setTemplateLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/resume-template", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to read resume");
+      }
+      const data = await res.json();
+      setTemplateText(data.text);
+      toast.success("Resume template loaded");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to read resume");
+      setTemplateFile(null);
+      setTemplateText(null);
+    } finally {
+      setTemplateLoading(false);
+    }
+  }
 
   async function handleTailor() {
     setTailoring(true);
@@ -46,6 +80,7 @@ export default function TailorPage() {
         body: JSON.stringify({
           block_ids: selectedIds,
           job_posting_id: jobId,
+          ...(templateText ? { resume_template_text: templateText } : {}),
         }),
       });
 
@@ -149,10 +184,53 @@ export default function TailorPage() {
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
           />
+
+          <div className="rounded-lg border p-4 space-y-3">
+            <p className="text-sm font-medium">Style Template <span className="text-muted-foreground font-normal">(optional)</span></p>
+            <p className="text-xs text-muted-foreground">Upload an existing resume PDF so Claude can match your writing style and tone.</p>
+            {!templateFile ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={templateLoading}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Upload resume PDF
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2">
+                {templateLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                ) : (
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                )}
+                <span className="text-sm truncate max-w-[200px]">{templateFile.name}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 shrink-0"
+                  onClick={() => { setTemplateFile(null); setTemplateText(null); }}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf"
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleTemplateUpload(f); }}
+            />
+          </div>
+
           <div className="flex justify-end">
             <Button
               onClick={handleTailor}
-              disabled={selectedIds.length === 0 || tailoring}
+              disabled={selectedIds.length === 0 || tailoring || templateLoading}
             >
               {tailoring ? (
                 <>

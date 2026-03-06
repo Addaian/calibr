@@ -57,6 +57,7 @@ export const scrapeJobSchema = z.object({
 export const tailorSchema = z.object({
   block_ids: z.array(z.string().uuid()).min(1, "Select at least one block"),
   job_posting_id: z.string().uuid(),
+  resume_template_text: z.string().optional(),
 });
 
 export const fitScoreSchema = z.object({
