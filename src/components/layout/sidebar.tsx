@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -25,11 +26,19 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
 
   async function handleSignOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      router.push("/login");
+    } catch {
+      setSigningOut(false);
+    }
   }
 
   return (
@@ -70,6 +79,7 @@ export function Sidebar() {
           variant="ghost"
           className="w-full justify-start gap-3 text-muted-foreground"
           onClick={handleSignOut}
+          disabled={signingOut}
         >
           <LogOut className="size-4" />
           Sign Out

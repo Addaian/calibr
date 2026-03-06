@@ -38,7 +38,7 @@ export default function BlocksPage() {
           ))}
         </div>
       ) : (
-        <BlockList blocks={data ?? []} />
+        <BlockList blocks={Array.isArray(data) ? data : []} />
       )}
     </div>
   );

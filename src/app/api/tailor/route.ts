@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.flatten() },
+        { error: "Validation failed", details: parsed.error.flatten() },
         { status: 400 }
       );
     }
@@ -74,15 +74,28 @@ export async function POST(request: Request) {
       );
     }
 
-    const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      return NextResponse.json(
-        { error: "Failed to parse AI response" },
-        { status: 500 }
-      );
+    let rawJson: unknown;
+    try {
+      rawJson = JSON.parse(content.text);
+    } catch {
+      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        return NextResponse.json(
+          { error: "Failed to parse AI response" },
+          { status: 500 }
+        );
+      }
+      rawJson = JSON.parse(jsonMatch[0]);
     }
 
-    const tailoredData = tailoredResumeSchema.parse(JSON.parse(jsonMatch[0]));
+    const tailorResult = tailoredResumeSchema.safeParse(rawJson);
+    if (!tailorResult.success) {
+      return NextResponse.json(
+        { error: "AI returned invalid data format" },
+        { status: 422 }
+      );
+    }
+    const tailoredData = tailorResult.data;
 
     const { data: resume, error: insertError } = await supabase
       .from("generated_resumes")

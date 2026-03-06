@@ -20,6 +20,7 @@ export async function GET(
       .from("generated_resumes")
       .select("*")
       .eq("id", id)
+      .eq("user_id", user.id)
       .single();
 
     if (error || !data) {
@@ -53,7 +54,8 @@ export async function DELETE(
     const { error } = await supabase
       .from("generated_resumes")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", user.id);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

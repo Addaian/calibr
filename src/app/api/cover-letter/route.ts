@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.flatten() },
+        { error: "Validation failed", details: parsed.error.flatten() },
         { status: 400 }
       );
     }
@@ -42,27 +42,45 @@ export async function POST(request: Request) {
 
     let blocksData;
     if (generated_resume_id) {
-      const { data: resume } = await supabase
+      const { data: resume, error: resumeError } = await supabase
         .from("generated_resumes")
         .select("selected_block_ids")
         .eq("id", generated_resume_id)
+        .eq("user_id", user.id)
         .single();
 
+      if (resumeError) {
+        return NextResponse.json(
+          { error: "Generated resume not found" },
+          { status: 404 }
+        );
+      }
+
       if (resume?.selected_block_ids?.length) {
-        const { data } = await supabase
+        const { data: resumeBlocks, error: blocksError } = await supabase
           .from("experience_blocks")
           .select("*")
-          .in("id", resume.selected_block_ids);
-        blocksData = data;
+          .in("id", resume.selected_block_ids)
+          .eq("user_id", user.id);
+
+        if (blocksError) {
+          return NextResponse.json({ error: blocksError.message }, { status: 500 });
+        }
+        blocksData = resumeBlocks;
       }
     }
 
     if (!blocksData) {
-      const { data } = await supabase
+      const { data: allBlocks, error: allBlocksError } = await supabase
         .from("experience_blocks")
         .select("*")
+        .eq("user_id", user.id)
         .order("sort_order");
-      blocksData = data;
+
+      if (allBlocksError) {
+        return NextResponse.json({ error: allBlocksError.message }, { status: 500 });
+      }
+      blocksData = allBlocks;
     }
 
     const blocksText = JSON.stringify(blocksData || [], null, 2);

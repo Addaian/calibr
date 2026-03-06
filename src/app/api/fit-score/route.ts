@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getClaudeClient } from "@/lib/claude/client";
 import { getFitScorePrompt } from "@/lib/claude/prompts/fit-score";
-import { fitScoreSchema } from "@/lib/claude/schemas/fit-score";
+import { fitScoreOutputSchema } from "@/lib/claude/schemas/fit-score";
 import { fitScoreSchema as fitScoreInputSchema } from "@/lib/validators";
 
 export async function POST(request: Request) {
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.flatten() },
+        { error: "Validation failed", details: parsed.error.flatten() },
         { status: 400 }
       );
     }
@@ -74,15 +74,28 @@ export async function POST(request: Request) {
       );
     }
 
-    const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      return NextResponse.json(
-        { error: "Failed to parse AI response" },
-        { status: 500 }
-      );
+    let rawJson: unknown;
+    try {
+      rawJson = JSON.parse(content.text);
+    } catch {
+      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        return NextResponse.json(
+          { error: "Failed to parse AI response" },
+          { status: 500 }
+        );
+      }
+      rawJson = JSON.parse(jsonMatch[0]);
     }
 
-    const fitData = fitScoreSchema.parse(JSON.parse(jsonMatch[0]));
+    const fitResult = fitScoreOutputSchema.safeParse(rawJson);
+    if (!fitResult.success) {
+      return NextResponse.json(
+        { error: "AI returned invalid data format" },
+        { status: 422 }
+      );
+    }
+    const fitData = fitResult.data;
 
     return NextResponse.json(fitData);
   } catch (error) {

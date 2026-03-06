@@ -53,6 +53,35 @@ export default function NewJobPage() {
     }
   }
 
+  async function handlePasteSubmit(text: string) {
+    setLoading(true);
+    setParsedJob(null);
+    setScrapedUrl(null);
+
+    try {
+      const res = await fetch("/api/jobs/parse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Failed to analyze job posting");
+      }
+
+      const data = await res.json();
+      setParsedJob(data);
+      toast.success("Job posting analyzed successfully");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to analyze job posting"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleSave() {
     if (!parsedJob) return;
 
@@ -92,7 +121,7 @@ export default function NewJobPage() {
 
       <Card>
         <CardContent className="pt-6">
-          <JobUrlForm onSubmit={handleUrlSubmit} loading={loading} />
+          <JobUrlForm onSubmit={handleUrlSubmit} onPasteSubmit={handlePasteSubmit} loading={loading} />
         </CardContent>
       </Card>
 

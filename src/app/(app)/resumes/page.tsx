@@ -20,7 +20,7 @@ function getScoreColor(score: number | null) {
 }
 
 export default function ResumesPage() {
-  const { data: resumes, mutate, isLoading } =
+  const { data: resumes, mutate, isLoading, error } =
     useSWR<GeneratedResume[]>("/api/resumes", fetcher);
 
   async function handleDelete(id: string) {
@@ -37,6 +37,12 @@ export default function ResumesPage() {
     <div className="space-y-6 p-6">
       <h1 className="text-2xl font-bold">Generated Resumes</h1>
 
+      {error && (
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          Failed to load resumes. Please try refreshing the page.
+        </div>
+      )}
+
       {isLoading && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -45,7 +51,7 @@ export default function ResumesPage() {
         </div>
       )}
 
-      {!isLoading && resumes && resumes.length === 0 && (
+      {!isLoading && Array.isArray(resumes) && resumes.length === 0 && (
         <div className="flex flex-col items-center justify-center gap-4 py-24">
           <FileText className="h-12 w-12 text-muted-foreground" />
           <p className="text-muted-foreground">No generated resumes yet.</p>
@@ -55,7 +61,7 @@ export default function ResumesPage() {
         </div>
       )}
 
-      {resumes && resumes.length > 0 && (
+      {Array.isArray(resumes) && resumes.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {resumes.map((resume) => (
             <Card key={resume.id} className="flex flex-col">

@@ -71,15 +71,28 @@ export async function POST(request: Request) {
       );
     }
 
-    const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      return NextResponse.json(
-        { error: "Failed to parse AI response" },
-        { status: 500 }
-      );
+    let rawJson: unknown;
+    try {
+      rawJson = JSON.parse(content.text);
+    } catch {
+      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        return NextResponse.json(
+          { error: "Failed to parse AI response" },
+          { status: 500 }
+        );
+      }
+      rawJson = JSON.parse(jsonMatch[0]);
     }
 
-    const parsed = parsedResumeSchema.parse(JSON.parse(jsonMatch[0]));
+    const parseResult = parsedResumeSchema.safeParse(rawJson);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: "AI returned invalid data format" },
+        { status: 422 }
+      );
+    }
+    const parsed = parseResult.data;
 
     return NextResponse.json(parsed);
   } catch (error) {
