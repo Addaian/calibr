@@ -83,9 +83,15 @@ export async function POST(request: Request) {
       blocksData = allBlocks;
     }
 
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single();
+
     const blocksText = JSON.stringify(blocksData || [], null, 2);
     const jobText = JSON.stringify(job, null, 2);
-    const prompt = getCoverLetterPrompt(blocksText, jobText, tone);
+    const prompt = getCoverLetterPrompt(blocksText, jobText, tone, profile?.full_name ?? undefined);
 
     const claude = getClaudeClient();
     const message = await claude.messages.create({

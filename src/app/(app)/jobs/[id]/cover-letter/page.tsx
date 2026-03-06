@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/select";
 import { CoverLetterEditor } from "@/components/cover-letter/cover-letter-editor";
 import type { JobPosting } from "@/types/jobs";
-import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
+import { downloadAsPdf, downloadAsDocx } from "@/lib/cover-letter-download";
+import { ArrowLeft, Loader2, Sparkles, Download, FileText, FileType } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -30,6 +31,32 @@ export default function CoverLetterPage() {
   const [content, setContent] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [generated, setGenerated] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  function getFilename() {
+    const company = job?.company || "Company";
+    return `Cover Letter - ${company}`;
+  }
+
+  async function handleDownloadPdf() {
+    setDownloading(true);
+    try {
+      downloadAsPdf(content, getFilename());
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  async function handleDownloadDocx() {
+    setDownloading(true);
+    try {
+      await downloadAsDocx(content, getFilename());
+    } catch {
+      toast.error("Failed to generate DOCX");
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   async function handleGenerate() {
     setLoading(true);
@@ -125,7 +152,7 @@ export default function CoverLetterPage() {
             content={content}
             onContentChange={setContent}
           />
-          <div className="flex justify-between">
+          <div className="flex items-center justify-between">
             <Button
               variant="outline"
               onClick={() => {
@@ -135,6 +162,29 @@ export default function CoverLetterPage() {
             >
               Regenerate
             </Button>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground flex items-center gap-1">
+                <Download className="h-3.5 w-3.5" />
+                Download as:
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={downloading}
+                onClick={handleDownloadDocx}
+              >
+                <FileType className="mr-1.5 h-4 w-4" />
+                DOCX
+              </Button>
+              <Button
+                size="sm"
+                disabled={downloading}
+                onClick={handleDownloadPdf}
+              >
+                <FileText className="mr-1.5 h-4 w-4" />
+                PDF
+              </Button>
+            </div>
           </div>
         </div>
       )}
