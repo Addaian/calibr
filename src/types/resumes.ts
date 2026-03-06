@@ -3,6 +3,7 @@ export interface TailoredBlock {
   type: string;
   title: string;
   organization: string | null;
+  location: string | null;
   start_date: string | null;
   end_date: string | null;
   bullet_points: string[];

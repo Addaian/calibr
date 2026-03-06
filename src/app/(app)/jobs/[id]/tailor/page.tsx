@@ -13,7 +13,9 @@ import { FitScoreDisplay } from "@/components/tailor/fit-score-display";
 import type { ExperienceBlock } from "@/types/blocks";
 import type { JobPosting } from "@/types/jobs";
 import type { GeneratedResume } from "@/types/resumes";
-import { ArrowLeft, ArrowRight, Loader2, Sparkles, Upload, X, FileText } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Sparkles, Upload, X, FileText, Palette } from "lucide-react";
+import type { StyleId } from "@/lib/resume-styles";
+import { RESUME_STYLES } from "@/lib/resume-styles";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -34,6 +36,8 @@ export default function TailorPage() {
   const [templateFile, setTemplateFile] = useState<File | null>(null);
   const [templateText, setTemplateText] = useState<string | null>(null);
   const [templateLoading, setTemplateLoading] = useState(false);
+  const [suggestedStyle, setSuggestedStyle] = useState<StyleId | null>(null);
+  const [styleReason, setStyleReason] = useState<string>("");
   const [fitScore, setFitScore] = useState<{
     score: number;
     pros: string[];
@@ -61,6 +65,10 @@ export default function TailorPage() {
       }
       const data = await res.json();
       setTemplateText(data.text);
+      if (data.suggestedStyle) {
+        setSuggestedStyle(data.suggestedStyle);
+        setStyleReason(data.styleReason ?? "");
+      }
       toast.success("Resume template loaded");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to read resume");
@@ -212,10 +220,17 @@ export default function TailorPage() {
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 shrink-0"
-                  onClick={() => { setTemplateFile(null); setTemplateText(null); }}
+                  onClick={() => { setTemplateFile(null); setTemplateText(null); setSuggestedStyle(null); setStyleReason(""); }}
                 >
                   <X className="h-3 w-3" />
                 </Button>
+              </div>
+            )}
+            {suggestedStyle && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Palette className="h-3 w-3" />
+                Detected style: <span className="font-medium text-foreground">{RESUME_STYLES[suggestedStyle].name}</span>
+                {styleReason && <span>— {styleReason}</span>}
               </div>
             )}
             <input
@@ -279,7 +294,12 @@ export default function TailorPage() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button
-                onClick={() => router.push(`/resumes/${resume.id}/export`)}
+                onClick={() => {
+                  const url = suggestedStyle
+                    ? `/resumes/${resume.id}/export?style=${suggestedStyle}`
+                    : `/resumes/${resume.id}/export`;
+                  router.push(url);
+                }}
               >
                 Export PDF
                 <ArrowRight className="ml-2 h-4 w-4" />

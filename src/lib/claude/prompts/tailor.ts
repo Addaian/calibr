@@ -28,6 +28,7 @@ Return ONLY valid JSON matching this exact schema:
       "type": "work_experience|project|education|skill|volunteering",
       "title": "original or slightly refined title",
       "organization": "original organization or null",
+      "location": "original location or null",
       "start_date": "original date or null",
       "end_date": "original date or null",
       "bullet_points": ["rewritten bullet 1", "rewritten bullet 2"],

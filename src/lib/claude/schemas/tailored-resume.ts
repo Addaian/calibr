@@ -5,6 +5,7 @@ export const tailoredBlockSchema = z.object({
   type: z.enum(["work_experience", "project", "education", "skill", "volunteering", "research"]),
   title: z.string(),
   organization: z.string().nullable(),
+  location: z.string().nullable(),
   start_date: z.string().nullable(),
   end_date: z.string().nullable(),
   bullet_points: z.array(z.string()),
