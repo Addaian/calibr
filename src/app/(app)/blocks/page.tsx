@@ -12,7 +12,7 @@ import type { ExperienceBlock } from "@/types/blocks";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function BlocksPage() {
-  const { data, isLoading, mutate } = useSWR<ExperienceBlock[]>("/api/blocks", fetcher);
+  const { data, isLoading, error, mutate } = useSWR<ExperienceBlock[]>("/api/blocks", fetcher);
 
   async function handleDelete(id: string) {
     try {
@@ -43,6 +43,12 @@ export default function BlocksPage() {
           </Button>
         </div>
       </div>
+
+      {error && (
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          Failed to load blocks. Please try refreshing the page.
+        </div>
+      )}
 
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
