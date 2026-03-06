@@ -1,0 +1,19 @@
+import { z } from "zod";
+
+export const tailoredBlockSchema = z.object({
+  block_id: z.string(),
+  type: z.string(),
+  title: z.string(),
+  organization: z.string().nullable(),
+  start_date: z.string().nullable(),
+  end_date: z.string().nullable(),
+  bullet_points: z.array(z.string()),
+  technologies: z.array(z.string()),
+});
+
+export const tailoredResumeSchema = z.object({
+  summary: z.string(),
+  blocks: z.array(tailoredBlockSchema),
+});
+
+export type TailoredResumeOutput = z.infer<typeof tailoredResumeSchema>;
