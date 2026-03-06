@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getClaudeClient } from "@/lib/claude/client";
+import { getClaudeClient, CLAUDE_MODEL } from "@/lib/claude/client";
 import { getFitScorePrompt } from "@/lib/claude/prompts/fit-score";
 import { fitScoreOutputSchema } from "@/lib/claude/schemas/fit-score";
 import { fitScoreSchema as fitScoreInputSchema } from "@/lib/validators";
@@ -32,11 +32,13 @@ export async function POST(request: Request) {
       supabase
         .from("experience_blocks")
         .select("*")
-        .in("id", block_ids),
+        .in("id", block_ids)
+        .eq("user_id", user.id),
       supabase
         .from("job_postings")
         .select("*")
         .eq("id", job_posting_id)
+        .eq("user_id", user.id)
         .single(),
     ]);
 
@@ -60,7 +62,7 @@ export async function POST(request: Request) {
 
     const claude = getClaudeClient();
     const message = await claude.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: CLAUDE_MODEL,
       max_tokens: 2048,
       system: prompt.system,
       messages: [{ role: "user", content: prompt.user }],
@@ -85,7 +87,14 @@ export async function POST(request: Request) {
           { status: 500 }
         );
       }
-      rawJson = JSON.parse(jsonMatch[0]);
+      try {
+        rawJson = JSON.parse(jsonMatch[0]);
+      } catch {
+        return NextResponse.json(
+          { error: "Failed to parse AI response" },
+          { status: 422 }
+        );
+      }
     }
 
     const fitResult = fitScoreOutputSchema.safeParse(rawJson);

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getClaudeClient } from "@/lib/claude/client";
+import { getClaudeClient, CLAUDE_MODEL } from "@/lib/claude/client";
 import { getParseResumePrompt } from "@/lib/claude/prompts/parse-resume";
 import { parsedResumeSchema } from "@/lib/claude/schemas/parsed-resume";
 
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     const claude = getClaudeClient();
 
     const message = await claude.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: CLAUDE_MODEL,
       max_tokens: 4096,
       system: prompt.system,
       messages: [{ role: "user", content: prompt.user }],
@@ -82,7 +82,14 @@ export async function POST(request: Request) {
           { status: 500 }
         );
       }
-      rawJson = JSON.parse(jsonMatch[0]);
+      try {
+        rawJson = JSON.parse(jsonMatch[0]);
+      } catch {
+        return NextResponse.json(
+          { error: "Failed to parse AI response" },
+          { status: 422 }
+        );
+      }
     }
 
     const parseResult = parsedResumeSchema.safeParse(rawJson);

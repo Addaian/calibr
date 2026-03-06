@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { scrapeJobSchema } from "@/lib/validators";
 import { scrapeJobPosting } from "@/lib/scraper";
-import { getClaudeClient } from "@/lib/claude/client";
+import { getClaudeClient, CLAUDE_MODEL } from "@/lib/claude/client";
 import { getScrapeJobPrompt } from "@/lib/claude/prompts/scrape-job";
 import { parsedJobSchema } from "@/lib/claude/schemas/parsed-job";
 
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     try {
       const claude = getClaudeClient();
       const message = await claude.messages.create({
-        model: "claude-sonnet-4-20250514",
+        model: CLAUDE_MODEL,
         max_tokens: 4096,
         messages: [
           {

@@ -7,6 +7,7 @@ export const parsedBlockSchema = z.object({
     "education",
     "skill",
     "volunteering",
+    "research",
   ]),
   title: z.string(),
   organization: z.string().nullable(),

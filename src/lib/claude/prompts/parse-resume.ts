@@ -3,7 +3,7 @@ export function getParseResumePrompt(resumeText: string): { system: string; user
     system: `You are a resume parser. Extract structured experience blocks from resume text.
 
 For each distinct experience, create a block with:
-- type: one of "work_experience", "project", "education", "skill", "volunteering"
+- type: one of "work_experience", "project", "education", "skill", "volunteering", "research"
 - title: job title, project name, degree, skill category, or activity name
 - organization: company, school, or organization name (null if not found)
 - location: city/state/country (null if not found)

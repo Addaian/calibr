@@ -25,7 +25,7 @@ Return ONLY valid JSON matching this exact schema:
   "blocks": [
     {
       "block_id": "original block UUID",
-      "type": "work_experience|project|education|skill|volunteering",
+      "type": "work_experience|project|education|skill|volunteering|research",
       "title": "original or slightly refined title",
       "organization": "original organization or null",
       "location": "original location or null",

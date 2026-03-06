@@ -45,6 +45,7 @@ export default function SettingsPage() {
           });
         }
       })
+      .catch(() => toast.error("Failed to load profile"))
       .finally(() => setFetching(false));
   }, []);
 

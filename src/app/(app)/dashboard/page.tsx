@@ -16,37 +16,43 @@ import { Skeleton } from "@/components/ui/skeleton";
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function DashboardPage() {
-  const { data: blocks } = useSWR("/api/blocks", fetcher);
-  const { data: jobs } = useSWR("/api/jobs", fetcher);
-  const { data: resumes } = useSWR("/api/resumes", fetcher);
-  const { data: coverLetters } = useSWR("/api/cover-letters", fetcher);
+  const { data: blocks, error: blocksError } = useSWR("/api/blocks", fetcher);
+  const { data: jobs, error: jobsError } = useSWR("/api/jobs", fetcher);
+  const { data: resumes, error: resumesError } = useSWR("/api/resumes", fetcher);
+  const { data: coverLetters, error: clError } = useSWR("/api/cover-letters", fetcher);
+
+  function count(data: unknown, error: unknown) {
+    if (Array.isArray(data)) return data.length;
+    if (error) return 0;
+    return null; // still loading
+  }
 
   const stats = [
     {
       title: "Experience Blocks",
       description: "Reusable resume building blocks",
-      count: Array.isArray(blocks) ? blocks.length : null,
+      count: count(blocks, blocksError),
       icon: Blocks,
       href: "/blocks",
     },
     {
       title: "Job Postings",
       description: "Saved job descriptions",
-      count: Array.isArray(jobs) ? jobs.length : null,
+      count: count(jobs, jobsError),
       icon: Briefcase,
       href: "/jobs",
     },
     {
       title: "Generated Resumes",
       description: "Tailored resumes created",
-      count: Array.isArray(resumes) ? resumes.length : null,
+      count: count(resumes, resumesError),
       icon: FileText,
       href: "/resumes",
     },
     {
       title: "Cover Letters",
       description: "Generated cover letters",
-      count: Array.isArray(coverLetters) ? coverLetters.length : null,
+      count: count(coverLetters, clError),
       icon: Mail,
       href: "/resumes",
     },

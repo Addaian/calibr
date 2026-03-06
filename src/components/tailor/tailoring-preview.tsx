@@ -9,6 +9,11 @@ interface TailoringPreviewProps {
   content: TailoredContent;
 }
 
+function formatDate(d: string | null) {
+  if (!d) return "Present";
+  return new Date(d).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+}
+
 export function TailoringPreview({ content }: TailoringPreviewProps) {
   return (
     <Card>
@@ -41,8 +46,7 @@ export function TailoringPreview({ content }: TailoringPreviewProps) {
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 {block.start_date && (
                   <span>
-                    {block.start_date}
-                    {block.end_date ? ` - ${block.end_date}` : " - Present"}
+                    {formatDate(block.start_date)} – {formatDate(block.end_date)}
                   </span>
                 )}
               </div>
