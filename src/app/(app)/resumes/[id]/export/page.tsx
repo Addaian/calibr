@@ -1,57 +1,30 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useParams, useSearchParams } from "next/navigation";
-import { useState } from "react";
 import useSWR from "swr";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { GeneratedResume } from "@/types/resumes";
-import type { ResumeProfile } from "@/components/resume/resume-pdf";
-import { ArrowLeft } from "lucide-react";
-import { RESUME_STYLES, DEFAULT_STYLE_ID, type StyleId } from "@/lib/resume-styles";
-
-const ResumePreview = dynamic(
-  () => import("@/components/resume/resume-preview").then((m) => m.ResumePreview),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex flex-col gap-4">
-        <Skeleton className="ml-auto h-10 w-36" />
-        <Skeleton className="h-[900px] w-full rounded-lg" />
-      </div>
-    ),
-  }
-);
+import { ArrowLeft, Download, FileText } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function ExportPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const initialStyle = (searchParams.get("style") as StyleId) ?? DEFAULT_STYLE_ID;
+  const sectionsParam = searchParams.get("sections");
 
-  const [selectedStyle, setSelectedStyle] = useState<StyleId>(
-    Object.keys(RESUME_STYLES).includes(initialStyle) ? initialStyle : DEFAULT_STYLE_ID
-  );
-
-  const { data: resume, isLoading: resumeLoading } = useSWR<GeneratedResume>(
+  const { data: resume, isLoading } = useSWR<GeneratedResume>(
     `/api/resumes/${params.id}`,
     fetcher
   );
-  const { data: profile, isLoading: profileLoading } = useSWR<ResumeProfile>(
-    "/api/profile",
-    fetcher
-  );
-
-  const isLoading = resumeLoading || profileLoading;
 
   if (isLoading) {
     return (
       <div className="space-y-4 p-6">
         <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-[900px] w-full" />
+        <Skeleton className="h-40 w-full max-w-md" />
       </div>
     );
   }
@@ -64,11 +37,14 @@ export default function ExportPage() {
     );
   }
 
-  const filename = resume.name || "resume";
+  const downloadUrl = sectionsParam
+    ? `/api/resumes/${params.id}/docx?sections=${sectionsParam}`
+    : `/api/resumes/${params.id}/docx`;
+
+  const blockCount = resume.tailored_content?.blocks?.length ?? 0;
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/resumes">
           <Button variant="ghost" size="icon">
@@ -78,36 +54,31 @@ export default function ExportPage() {
         <h1 className="text-2xl font-bold">{resume.name}</h1>
       </div>
 
-      {/* Style picker */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium">Resume Style</p>
-        <div className="grid grid-cols-3 gap-3">
-          {Object.values(RESUME_STYLES).map((style) => (
-            <button
-              key={style.id}
-              onClick={() => setSelectedStyle(style.id)}
-              className={`rounded-lg border-2 p-3 text-left transition-colors ${
-                selectedStyle === style.id
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:border-muted-foreground/50"
-              }`}
-            >
-              <p className="text-sm font-semibold">{style.name}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground leading-snug">
-                {style.description}
-              </p>
-            </button>
-          ))}
+      <div className="max-w-md rounded-xl border p-6 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-muted p-2">
+            <FileText className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <div>
+            <p className="font-semibold">{resume.name}</p>
+            <p className="text-sm text-muted-foreground">
+              {blockCount} section{blockCount !== 1 ? "s" : ""} · Garamond · DOCX
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Preview */}
-      <ResumePreview
-        content={resume.tailored_content}
-        profile={profile}
-        filename={filename}
-        styleId={selectedStyle}
-      />
+        <p className="text-sm text-muted-foreground">
+          Formatted in the Garamond finance style — single page, tight spacing, tab-aligned dates.
+          Opens directly in Word or Google Docs.
+        </p>
+
+        <Button asChild className="w-full">
+          <a href={downloadUrl} download>
+            <Download className="mr-2 h-4 w-4" />
+            Download .docx
+          </a>
+        </Button>
+      </div>
     </div>
   );
 }

@@ -14,7 +14,7 @@ import type { ExperienceBlock } from "@/types/blocks";
 import type { JobPosting } from "@/types/jobs";
 import type { GeneratedResume } from "@/types/resumes";
 import { ArrowLeft, ArrowRight, Loader2, Sparkles, Upload, X, FileText, Palette } from "lucide-react";
-import type { StyleId } from "@/lib/resume-styles";
+import type { StyleId, Density } from "@/lib/resume-styles";
 import { RESUME_STYLES } from "@/lib/resume-styles";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -38,6 +38,10 @@ export default function TailorPage() {
   const [templateLoading, setTemplateLoading] = useState(false);
   const [suggestedStyle, setSuggestedStyle] = useState<StyleId | null>(null);
   const [styleReason, setStyleReason] = useState<string>("");
+  const [detectedSections, setDetectedSections] = useState<string[]>([]);
+  const [detectedDensity, setDetectedDensity] = useState<Density | null>(null);
+  const [detectedNameUppercase, setDetectedNameUppercase] = useState<boolean | null>(null);
+  const [detectedHeaderAlign, setDetectedHeaderAlign] = useState<"center" | "left" | null>(null);
   const [fitScore, setFitScore] = useState<{
     score: number;
     pros: string[];
@@ -69,6 +73,12 @@ export default function TailorPage() {
         setSuggestedStyle(data.suggestedStyle);
         setStyleReason(data.styleReason ?? "");
       }
+      if (Array.isArray(data.detectedSections) && data.detectedSections.length > 0) {
+        setDetectedSections(data.detectedSections);
+      }
+      if (data.density) setDetectedDensity(data.density);
+      if (typeof data.nameUppercase === "boolean") setDetectedNameUppercase(data.nameUppercase);
+      if (data.headerAlign) setDetectedHeaderAlign(data.headerAlign);
       toast.success("Resume template loaded");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to read resume");
@@ -195,7 +205,7 @@ export default function TailorPage() {
 
           <div className="rounded-lg border p-4 space-y-3">
             <p className="text-sm font-medium">Style Template <span className="text-muted-foreground font-normal">(optional)</span></p>
-            <p className="text-xs text-muted-foreground">Upload an existing resume PDF so Claude can match your writing style and tone.</p>
+            <p className="text-xs text-muted-foreground">Upload an existing resume PDF so Claude can match its font, section order, spacing, and writing style.</p>
             {!templateFile ? (
               <Button
                 type="button"
@@ -220,7 +230,7 @@ export default function TailorPage() {
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 shrink-0"
-                  onClick={() => { setTemplateFile(null); setTemplateText(null); setSuggestedStyle(null); setStyleReason(""); }}
+                  onClick={() => { setTemplateFile(null); setTemplateText(null); setSuggestedStyle(null); setStyleReason(""); setDetectedSections([]); setDetectedDensity(null); setDetectedNameUppercase(null); setDetectedHeaderAlign(null); }}
                 >
                   <X className="h-3 w-3" />
                 </Button>
@@ -295,10 +305,14 @@ export default function TailorPage() {
               </Button>
               <Button
                 onClick={() => {
-                  const url = suggestedStyle
-                    ? `/resumes/${resume.id}/export?style=${suggestedStyle}`
-                    : `/resumes/${resume.id}/export`;
-                  router.push(url);
+                  const params = new URLSearchParams();
+                  if (suggestedStyle) params.set("style", suggestedStyle);
+                  if (detectedSections.length > 0) params.set("sections", detectedSections.join(","));
+                  if (detectedDensity) params.set("density", detectedDensity);
+                  if (detectedNameUppercase !== null) params.set("uppercase", String(detectedNameUppercase));
+                  if (detectedHeaderAlign) params.set("align", detectedHeaderAlign);
+                  const qs = params.toString();
+                  router.push(`/resumes/${resume.id}/export${qs ? `?${qs}` : ""}`);
                 }}
               >
                 Export PDF
