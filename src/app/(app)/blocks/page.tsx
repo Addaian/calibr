@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import useSWR from "swr";
-import { Plus } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BlockList } from "@/components/blocks/block-list";
@@ -17,12 +17,20 @@ export default function BlocksPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Experience Blocks</h1>
-        <Button asChild>
-          <Link href="/blocks/new">
-            <Plus />
-            Add Block
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/blocks/import">
+              <Upload />
+              Import from Resume
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/blocks/new">
+              <Plus />
+              Add Block
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (

@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer());
 
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pdfParse = require("pdf-parse");
+    const pdfParse = require("pdf-parse/lib/pdf-parse");
     const pdfData = await pdfParse(buffer);
     const resumeText = pdfData.text;
 
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Import error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 }
     );
   }
