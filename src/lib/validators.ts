@@ -6,6 +6,7 @@ export const blockTypes = [
   "education",
   "skill",
   "volunteering",
+  "research",
 ] as const;
 
 export const blockTypeSchema = z.enum(blockTypes);

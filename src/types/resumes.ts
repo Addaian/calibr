@@ -26,6 +26,7 @@ export interface GeneratedResume {
   job_posting_id: string | null;
   name: string;
   template: string;
+  source: "uploaded" | "generated";
   selected_block_ids: string[];
   tailored_content: TailoredContent;
   fit_score: number | null;

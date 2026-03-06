@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const tailoredBlockSchema = z.object({
   block_id: z.string(),
-  type: z.enum(["work_experience", "project", "education", "skill", "volunteering"]),
+  type: z.enum(["work_experience", "project", "education", "skill", "volunteering", "research"]),
   title: z.string(),
   organization: z.string().nullable(),
   start_date: z.string().nullable(),

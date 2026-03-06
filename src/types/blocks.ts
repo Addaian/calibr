@@ -3,7 +3,8 @@ export type BlockType =
   | "project"
   | "education"
   | "skill"
-  | "volunteering";
+  | "volunteering"
+  | "research";
 
 export interface ExperienceBlock {
   id: string;

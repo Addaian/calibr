@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import useSWR from "swr";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -7,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { GeneratedResume } from "@/types/resumes";
-import { FileText, Trash2 } from "lucide-react";
+import { FileText, Trash2, Upload, Sparkles } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -19,7 +21,10 @@ function getScoreColor(score: number | null) {
   return "destructive";
 }
 
+type Filter = "all" | "uploaded" | "generated";
+
 export default function ResumesPage() {
+  const [filter, setFilter] = useState<Filter>("all");
   const { data: resumes, mutate, isLoading, error } =
     useSWR<GeneratedResume[]>("/api/resumes", fetcher);
 
@@ -33,14 +38,35 @@ export default function ResumesPage() {
     }
   }
 
+  const allResumes = Array.isArray(resumes) ? resumes : [];
+  const filtered = filter === "all"
+    ? allResumes
+    : allResumes.filter((r) => r.source === filter);
+
   return (
     <div className="space-y-6 p-6">
-      <h1 className="text-2xl font-bold">Generated Resumes</h1>
+      <h1 className="text-2xl font-bold">Resumes</h1>
 
       {error && (
         <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           Failed to load resumes. Please try refreshing the page.
         </div>
+      )}
+
+      {!isLoading && allResumes.length > 0 && (
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
+          <TabsList>
+            <TabsTrigger value="all">All ({allResumes.length})</TabsTrigger>
+            <TabsTrigger value="uploaded">
+              <Upload className="mr-1.5 h-3.5 w-3.5" />
+              Uploaded ({allResumes.filter((r) => r.source === "uploaded").length})
+            </TabsTrigger>
+            <TabsTrigger value="generated">
+              <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+              AI Generated ({allResumes.filter((r) => r.source === "generated").length})
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       )}
 
       {isLoading && (
@@ -51,22 +77,44 @@ export default function ResumesPage() {
         </div>
       )}
 
-      {!isLoading && Array.isArray(resumes) && resumes.length === 0 && (
+      {!isLoading && filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center gap-4 py-24">
           <FileText className="h-12 w-12 text-muted-foreground" />
-          <p className="text-muted-foreground">No generated resumes yet.</p>
-          <Link href="/jobs">
-            <Button>Browse Jobs</Button>
-          </Link>
+          <p className="text-muted-foreground">
+            {filter === "uploaded"
+              ? "No uploaded resumes yet."
+              : filter === "generated"
+              ? "No AI-generated resumes yet."
+              : "No resumes yet."}
+          </p>
+          {filter !== "uploaded" && (
+            <Link href="/jobs">
+              <Button>Browse Jobs</Button>
+            </Link>
+          )}
+          {filter !== "generated" && (
+            <Link href="/blocks/import">
+              <Button variant="outline">Import from Resume</Button>
+            </Link>
+          )}
         </div>
       )}
 
-      {Array.isArray(resumes) && resumes.length > 0 && (
+      {filtered.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {resumes.map((resume) => (
+          {filtered.map((resume) => (
             <Card key={resume.id} className="flex flex-col">
               <CardHeader className="flex-row items-start justify-between gap-2 pb-2">
-                <CardTitle className="text-base">{resume.name}</CardTitle>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <CardTitle className="text-base truncate">{resume.name}</CardTitle>
+                  <Badge variant="outline" className="text-xs">
+                    {resume.source === "uploaded" ? (
+                      <><Upload className="mr-1 h-3 w-3" />Uploaded</>
+                    ) : (
+                      <><Sparkles className="mr-1 h-3 w-3" />AI Generated</>
+                    )}
+                  </Badge>
+                </div>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -77,24 +125,25 @@ export default function ResumesPage() {
                 </Button>
               </CardHeader>
               <CardContent className="flex flex-1 flex-col justify-between gap-4">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {resume.fit_score !== null && (
                     <Badge variant={getScoreColor(resume.fit_score)}>
                       {resume.fit_score}% fit
                     </Badge>
                   )}
-                  <Badge variant="outline">{resume.template}</Badge>
                   <span className="text-xs text-muted-foreground">
                     {resume.selected_block_ids?.length ?? 0} blocks
                   </span>
                 </div>
-                <div className="flex gap-2">
-                  <Link href={`/resumes/${resume.id}/export`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">
-                      Export PDF
-                    </Button>
-                  </Link>
-                </div>
+                {resume.source === "generated" && (
+                  <div className="flex gap-2">
+                    <Link href={`/resumes/${resume.id}/export`} className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full">
+                        Export PDF
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

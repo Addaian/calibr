@@ -20,9 +20,84 @@ const blockTypeOptions: { value: BlockType; label: string }[] = [
   { value: "work_experience", label: "Work Experience" },
   { value: "project", label: "Project" },
   { value: "education", label: "Education" },
+  { value: "research", label: "Research" },
   { value: "skill", label: "Skill" },
   { value: "volunteering", label: "Volunteering" },
 ];
+
+type FieldConfig = {
+  titleLabel: string;
+  titlePlaceholder: string;
+  orgLabel: string;
+  orgPlaceholder: string;
+  locationLabel: string;
+  locationPlaceholder: string;
+  showLocation: boolean;
+  showDates: boolean;
+};
+
+const fieldConfigs: Record<BlockType, FieldConfig> = {
+  work_experience: {
+    titleLabel: "Job Title",
+    titlePlaceholder: "e.g. Software Engineer",
+    orgLabel: "Company",
+    orgPlaceholder: "e.g. Acme Corp",
+    locationLabel: "Location",
+    locationPlaceholder: "e.g. San Francisco, CA",
+    showLocation: true,
+    showDates: true,
+  },
+  project: {
+    titleLabel: "Project Name",
+    titlePlaceholder: "e.g. Open Source CLI Tool",
+    orgLabel: "Organization",
+    orgPlaceholder: "e.g. Personal, MIT",
+    locationLabel: "Location",
+    locationPlaceholder: "",
+    showLocation: false,
+    showDates: true,
+  },
+  education: {
+    titleLabel: "Degree / Program",
+    titlePlaceholder: "e.g. B.Sc. Computer Science",
+    orgLabel: "Institution",
+    orgPlaceholder: "e.g. MIT",
+    locationLabel: "Location",
+    locationPlaceholder: "e.g. Cambridge, MA",
+    showLocation: true,
+    showDates: true,
+  },
+  research: {
+    titleLabel: "Research Role",
+    titlePlaceholder: "e.g. Research Assistant",
+    orgLabel: "Professor / Supervisor",
+    orgPlaceholder: "e.g. Prof. Jane Smith",
+    locationLabel: "Institution",
+    locationPlaceholder: "e.g. MIT",
+    showLocation: true,
+    showDates: true,
+  },
+  skill: {
+    titleLabel: "Skill Category",
+    titlePlaceholder: "e.g. Programming Languages",
+    orgLabel: "Organization",
+    orgPlaceholder: "",
+    locationLabel: "Location",
+    locationPlaceholder: "",
+    showLocation: false,
+    showDates: false,
+  },
+  volunteering: {
+    titleLabel: "Role",
+    titlePlaceholder: "e.g. Mentor",
+    orgLabel: "Organization",
+    orgPlaceholder: "e.g. Code.org",
+    locationLabel: "Location",
+    locationPlaceholder: "e.g. San Francisco, CA",
+    showLocation: true,
+    showDates: true,
+  },
+};
 
 interface BlockFormProps {
   initialData?: Partial<ExperienceBlock>;
@@ -32,6 +107,7 @@ interface BlockFormProps {
 
 export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
   const [type, setType] = useState<BlockType>(initialData?.type ?? "work_experience");
+  const config = fieldConfigs[type];
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [organization, setOrganization] = useState(initialData?.organization ?? "");
   const [location, setLocation] = useState(initialData?.location ?? "");
@@ -52,6 +128,9 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
   );
   const [certifications, setCertifications] = useState(
     (initialData?.metadata?.certifications as string) ?? ""
+  );
+  const [researchTopic, setResearchTopic] = useState(
+    (initialData?.metadata?.research_topic as string) ?? ""
   );
 
   function addBulletPoint() {
@@ -98,6 +177,10 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
       if (certifications) metadata.certifications = certifications;
     }
 
+    if (type === "research") {
+      if (researchTopic) metadata.research_topic = researchTopic;
+    }
+
     onSubmit({
       type,
       title,
@@ -135,55 +218,65 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title">{config.titleLabel}</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Software Engineer"
+                placeholder={config.titlePlaceholder}
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="organization">Organization</Label>
-              <Input
-                id="organization"
-                value={organization}
-                onChange={(e) => setOrganization(e.target.value)}
-                placeholder="e.g. Acme Corp"
-              />
-            </div>
+            {config.orgLabel && (
+              <div className="space-y-2">
+                <Label htmlFor="organization">{config.orgLabel}</Label>
+                <Input
+                  id="organization"
+                  value={organization}
+                  onChange={(e) => setOrganization(e.target.value)}
+                  placeholder={config.orgPlaceholder}
+                />
+              </div>
+            )}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g. San Francisco, CA"
-              />
+          {(config.showLocation || config.showDates) && (
+            <div className="grid gap-4 sm:grid-cols-3">
+              {config.showLocation && (
+                <div className="space-y-2">
+                  <Label htmlFor="location">{config.locationLabel}</Label>
+                  <Input
+                    id="location"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder={config.locationPlaceholder}
+                  />
+                </div>
+              )}
+              {config.showDates && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="start_date">Start Date</Label>
+                    <Input
+                      id="start_date"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="end_date">End Date</Label>
+                    <Input
+                      id="end_date"
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="start_date">Start Date</Label>
-              <Input
-                id="start_date"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="end_date">End Date</Label>
-              <Input
-                id="end_date"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
-          </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
@@ -293,6 +386,18 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
                 onChange={(e) => setCertifications(e.target.value)}
                 placeholder="List relevant certifications..."
                 rows={3}
+              />
+            </div>
+          )}
+
+          {type === "research" && (
+            <div className="space-y-2">
+              <Label htmlFor="research_topic">Research Topic / Area</Label>
+              <Input
+                id="research_topic"
+                value={researchTopic}
+                onChange={(e) => setResearchTopic(e.target.value)}
+                placeholder="e.g. Natural Language Processing, Computer Vision"
               />
             </div>
           )}

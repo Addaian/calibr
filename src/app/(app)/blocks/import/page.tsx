@@ -22,6 +22,7 @@ export default function ImportPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [parsing, setParsing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [fileName, setFileName] = useState<string>("");
   const [parsedBlocks, setParsedBlocks] = useState<ParsedBlock[] | null>(null);
   const [included, setIncluded] = useState<Set<number>>(new Set());
 
@@ -42,6 +43,7 @@ export default function ImportPage() {
       return;
     }
 
+    setFileName(file.name.replace(/\.pdf$/i, ""));
     setParsing(true);
     const formData = new FormData();
     formData.append("file", file);
@@ -90,17 +92,34 @@ export default function ImportPage() {
 
     setSaving(true);
     try {
-      await Promise.all(
+      const responses = await Promise.all(
         toSave.map((block) =>
           fetch("/api/blocks", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ...block, sort_order: 0 }),
-          })
+          }).then((r) => r.json())
         )
       );
+
+      const savedIds = responses
+        .filter((r) => r?.id)
+        .map((r) => r.id as string);
+
+      await fetch("/api/resumes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fileName || "Uploaded Resume",
+          source: "uploaded",
+          selected_block_ids: savedIds,
+          tailored_content: { summary: "", blocks: [] },
+          template: "classic",
+        }),
+      });
+
       toast.success(`Saved ${toSave.length} blocks`);
-      router.push("/blocks");
+      router.push("/resumes");
     } catch {
       toast.error("Failed to save some blocks");
     } finally {
