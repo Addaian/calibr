@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import useSWR from "swr";
-import { Plus } from "lucide-react";
+import { Plus, LayoutGrid, List, Building2, MapPin, Tag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { JobCard } from "@/components/jobs/job-card";
 import type { JobPosting } from "@/types/jobs";
@@ -15,11 +17,20 @@ const fetcher = (url: string) =>
     return res.json();
   });
 
+const statusConfig: Record<
+  JobPosting["status"],
+  { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
+> = {
+  active: { label: "Active", variant: "default" },
+  applied: { label: "Applied", variant: "secondary" },
+  interview: { label: "Interview", variant: "outline" },
+  rejected: { label: "Rejected", variant: "destructive" },
+  offer: { label: "Offer", variant: "default" },
+};
+
 export default function JobsPage() {
-  const { data, error, isLoading, mutate } = useSWR<JobPosting[]>(
-    "/api/jobs",
-    fetcher
-  );
+  const [view, setView] = useState<"grid" | "list">("grid");
+  const { data, error, isLoading, mutate } = useSWR<JobPosting[]>("/api/jobs", fetcher);
 
   async function handleDelete(id: string) {
     try {
@@ -42,6 +53,27 @@ export default function JobsPage() {
             Add Job
           </Link>
         </Button>
+      </div>
+
+      <div className="flex items-center justify-end">
+        <div className="flex items-center rounded-md border p-0.5">
+          <Button
+            variant={view === "grid" ? "secondary" : "ghost"}
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => setView("grid")}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant={view === "list" ? "secondary" : "ghost"}
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => setView("list")}
+          >
+            <List className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
 
       {isLoading && (
@@ -78,11 +110,69 @@ export default function JobsPage() {
         </div>
       )}
 
-      {data && data.length > 0 && (
+      {data && data.length > 0 && view === "grid" && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {data.map((job) => (
             <JobCard key={job.id} job={job} onDelete={handleDelete} />
           ))}
+        </div>
+      )}
+
+      {data && data.length > 0 && view === "list" && (
+        <div className="divide-y rounded-lg border">
+          {data.map((job) => {
+            const status = statusConfig[job.status];
+            const keywordCount =
+              job.keywords.length + job.required_skills.length + job.preferred_skills.length;
+            return (
+              <div key={job.id} className="flex items-center gap-4 px-4 py-3">
+                <Badge variant={status.variant} className="w-20 shrink-0 justify-center">
+                  {status.label}
+                </Badge>
+                <div className="min-w-0 flex-1">
+                  <Link href={`/jobs/${job.id}`} className="truncate text-sm font-medium hover:underline">
+                    {job.title}
+                  </Link>
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                    {job.company && (
+                      <span className="flex items-center gap-0.5">
+                        <Building2 className="h-3 w-3" />{job.company}
+                      </span>
+                    )}
+                    {job.location && (
+                      <span className="flex items-center gap-0.5">
+                        <MapPin className="h-3 w-3" />{job.location}
+                      </span>
+                    )}
+                    {keywordCount > 0 && (
+                      <span className="flex items-center gap-0.5">
+                        <Tag className="h-3 w-3" />{keywordCount} keyword{keywordCount !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {new Date(job.created_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </span>
+                <div className="flex shrink-0 gap-1">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/jobs/${job.id}`}>View</Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => handleDelete(job.id)}
+                  >
+                    <Trash2 className="size-4 text-muted-foreground" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
