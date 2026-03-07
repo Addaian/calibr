@@ -50,7 +50,11 @@ export const createJobSchema = z.object({
     .nullable()
     .optional(),
   status: z
-    .enum(["active", "applied", "interview", "rejected", "offer"])
+    .enum([
+      "active", "applying", "applied", "screening", "interview",
+      "assessment", "final_round", "offer", "negotiating", "accepted",
+      "rejected", "withdrawn", "ghosted", "declined",
+    ])
     .default("active"),
   status_date: z.string().nullable().optional(),
 });
