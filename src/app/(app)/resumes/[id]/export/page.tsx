@@ -1,12 +1,30 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useParams, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { GeneratedResume } from "@/types/resumes";
-import { ArrowLeft, Download, FileText } from "lucide-react";
+import type { ResumeProfile } from "@/components/resume/resume-pdf";
+import { ArrowLeft } from "lucide-react";
+
+const ResumePreview = dynamic(
+  () => import("@/components/resume/resume-preview").then((m) => m.ResumePreview),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-3 self-end">
+          <Skeleton className="h-10 w-36" />
+          <Skeleton className="h-10 w-36" />
+        </div>
+        <Skeleton className="h-[900px] w-full rounded-lg" />
+      </div>
+    ),
+  }
+);
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -14,17 +32,22 @@ export default function ExportPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const sectionsParam = searchParams.get("sections");
+  const sectionOrder = sectionsParam?.split(",").filter(Boolean);
 
-  const { data: resume, isLoading } = useSWR<GeneratedResume>(
+  const { data: resume, isLoading: resumeLoading } = useSWR<GeneratedResume>(
     `/api/resumes/${params.id}`,
     fetcher
   );
+  const { data: profile, isLoading: profileLoading } = useSWR<ResumeProfile>(
+    "/api/profile",
+    fetcher
+  );
 
-  if (isLoading) {
+  if (resumeLoading || profileLoading) {
     return (
       <div className="space-y-4 p-6">
         <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-40 w-full max-w-md" />
+        <Skeleton className="h-[900px] w-full" />
       </div>
     );
   }
@@ -37,12 +60,6 @@ export default function ExportPage() {
     );
   }
 
-  const downloadUrl = sectionsParam
-    ? `/api/resumes/${params.id}/docx?sections=${sectionsParam}`
-    : `/api/resumes/${params.id}/docx`;
-
-  const blockCount = resume.tailored_content?.blocks?.length ?? 0;
-
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center gap-4">
@@ -54,31 +71,13 @@ export default function ExportPage() {
         <h1 className="text-2xl font-bold">{resume.name}</h1>
       </div>
 
-      <div className="max-w-md rounded-xl border p-6 space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted p-2">
-            <FileText className="h-5 w-5 text-muted-foreground" />
-          </div>
-          <div>
-            <p className="font-semibold">{resume.name}</p>
-            <p className="text-sm text-muted-foreground">
-              {blockCount} section{blockCount !== 1 ? "s" : ""} · Garamond · DOCX
-            </p>
-          </div>
-        </div>
-
-        <p className="text-sm text-muted-foreground">
-          Formatted in the Garamond finance style — single page, tight spacing, tab-aligned dates.
-          Opens directly in Word or Google Docs.
-        </p>
-
-        <Button asChild className="w-full">
-          <a href={downloadUrl} download>
-            <Download className="mr-2 h-4 w-4" />
-            Download .docx
-          </a>
-        </Button>
-      </div>
+      <ResumePreview
+        content={resume.tailored_content}
+        profile={profile}
+        filename={resume.name || "resume"}
+        resumeId={params.id as string}
+        sectionOrder={sectionOrder?.length ? sectionOrder : undefined}
+      />
     </div>
   );
 }

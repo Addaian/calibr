@@ -13,9 +13,7 @@ import { FitScoreDisplay } from "@/components/tailor/fit-score-display";
 import type { ExperienceBlock } from "@/types/blocks";
 import type { JobPosting } from "@/types/jobs";
 import type { GeneratedResume } from "@/types/resumes";
-import { ArrowLeft, ArrowRight, Loader2, Sparkles, Upload, X, FileText, Palette } from "lucide-react";
-import type { StyleId, Density } from "@/lib/resume-styles";
-import { RESUME_STYLES } from "@/lib/resume-styles";
+import { ArrowLeft, ArrowRight, Loader2, Sparkles, Upload, X, FileText } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -36,12 +34,8 @@ export default function TailorPage() {
   const [templateFile, setTemplateFile] = useState<File | null>(null);
   const [templateText, setTemplateText] = useState<string | null>(null);
   const [templateLoading, setTemplateLoading] = useState(false);
-  const [suggestedStyle, setSuggestedStyle] = useState<StyleId | null>(null);
   const [styleReason, setStyleReason] = useState<string>("");
   const [detectedSections, setDetectedSections] = useState<string[]>([]);
-  const [detectedDensity, setDetectedDensity] = useState<Density | null>(null);
-  const [detectedNameUppercase, setDetectedNameUppercase] = useState<boolean | null>(null);
-  const [detectedHeaderAlign, setDetectedHeaderAlign] = useState<"center" | "left" | null>(null);
   const [fitScore, setFitScore] = useState<{
     score: number;
     pros: string[];
@@ -69,16 +63,10 @@ export default function TailorPage() {
       }
       const data = await res.json();
       setTemplateText(data.text);
-      if (data.suggestedStyle) {
-        setSuggestedStyle(data.suggestedStyle);
-        setStyleReason(data.styleReason ?? "");
-      }
+      if (data.styleReason) setStyleReason(data.styleReason);
       if (Array.isArray(data.detectedSections) && data.detectedSections.length > 0) {
         setDetectedSections(data.detectedSections);
       }
-      if (data.density) setDetectedDensity(data.density);
-      if (typeof data.nameUppercase === "boolean") setDetectedNameUppercase(data.nameUppercase);
-      if (data.headerAlign) setDetectedHeaderAlign(data.headerAlign);
       toast.success("Resume template loaded");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to read resume");
@@ -230,18 +218,14 @@ export default function TailorPage() {
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 shrink-0"
-                  onClick={() => { setTemplateFile(null); setTemplateText(null); setSuggestedStyle(null); setStyleReason(""); setDetectedSections([]); setDetectedDensity(null); setDetectedNameUppercase(null); setDetectedHeaderAlign(null); }}
+                  onClick={() => { setTemplateFile(null); setTemplateText(null); setStyleReason(""); setDetectedSections([]); }}
                 >
                   <X className="h-3 w-3" />
                 </Button>
               </div>
             )}
-            {suggestedStyle && (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Palette className="h-3 w-3" />
-                Detected style: <span className="font-medium text-foreground">{RESUME_STYLES[suggestedStyle].name}</span>
-                {styleReason && <span>— {styleReason}</span>}
-              </div>
+            {styleReason && (
+              <p className="text-xs text-muted-foreground">{styleReason}</p>
             )}
             <input
               ref={fileInputRef}
@@ -305,17 +289,13 @@ export default function TailorPage() {
               </Button>
               <Button
                 onClick={() => {
-                  const params = new URLSearchParams();
-                  if (suggestedStyle) params.set("style", suggestedStyle);
-                  if (detectedSections.length > 0) params.set("sections", detectedSections.join(","));
-                  if (detectedDensity) params.set("density", detectedDensity);
-                  if (detectedNameUppercase !== null) params.set("uppercase", String(detectedNameUppercase));
-                  if (detectedHeaderAlign) params.set("align", detectedHeaderAlign);
-                  const qs = params.toString();
-                  router.push(`/resumes/${resume.id}/export${qs ? `?${qs}` : ""}`);
+                  const qs = detectedSections.length > 0
+                    ? `?sections=${detectedSections.join(",")}`
+                    : "";
+                  router.push(`/resumes/${resume.id}/export${qs}`);
                 }}
               >
-                Export PDF
+                Export Resume
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
