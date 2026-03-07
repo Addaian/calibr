@@ -4,7 +4,6 @@ export const blockTypes = [
   "work_experience",
   "project",
   "education",
-  "skill",
   "volunteering",
   "research",
 ] as const;
@@ -49,6 +48,7 @@ export const createJobSchema = z.object({
   status: z
     .enum(["active", "applied", "interview", "rejected", "offer"])
     .default("active"),
+  status_date: z.string().nullable().optional(),
 });
 
 export const scrapeJobSchema = z.object({

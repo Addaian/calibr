@@ -21,7 +21,6 @@ const blockTypeOptions: { value: BlockType; label: string }[] = [
   { value: "project", label: "Project" },
   { value: "education", label: "Education" },
   { value: "research", label: "Research" },
-  { value: "skill", label: "Skill" },
   { value: "volunteering", label: "Volunteering" },
 ];
 
@@ -77,16 +76,6 @@ const fieldConfigs: Record<BlockType, FieldConfig> = {
     showLocation: true,
     showDates: true,
   },
-  skill: {
-    titleLabel: "Skill Category",
-    titlePlaceholder: "e.g. Programming Languages",
-    orgLabel: "Organization",
-    orgPlaceholder: "",
-    locationLabel: "Location",
-    locationPlaceholder: "",
-    showLocation: false,
-    showDates: false,
-  },
   volunteering: {
     titleLabel: "Role",
     titlePlaceholder: "e.g. Mentor",
@@ -106,7 +95,11 @@ interface BlockFormProps {
 }
 
 export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
-  const [type, setType] = useState<BlockType>(initialData?.type ?? "work_experience");
+  const [type, setType] = useState<BlockType>(
+    initialData?.type && initialData.type in fieldConfigs
+      ? initialData.type
+      : "work_experience"
+  );
   const config = fieldConfigs[type];
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [organization, setOrganization] = useState(initialData?.organization ?? "");
@@ -125,9 +118,6 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
   );
   const [coursework, setCoursework] = useState(
     (initialData?.metadata?.coursework as string) ?? ""
-  );
-  const [certifications, setCertifications] = useState(
-    (initialData?.metadata?.certifications as string) ?? ""
   );
   const [researchTopic, setResearchTopic] = useState(
     (initialData?.metadata?.research_topic as string) ?? ""
@@ -171,10 +161,6 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
     if (type === "education") {
       if (gpa) metadata.gpa = gpa;
       if (coursework) metadata.coursework = coursework;
-    }
-
-    if (type === "skill") {
-      if (certifications) metadata.certifications = certifications;
     }
 
     if (type === "research") {
@@ -375,19 +361,6 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
                 />
               </div>
             </>
-          )}
-
-          {type === "skill" && (
-            <div className="space-y-2">
-              <Label htmlFor="certifications">Certifications</Label>
-              <Textarea
-                id="certifications"
-                value={certifications}
-                onChange={(e) => setCertifications(e.target.value)}
-                placeholder="List relevant certifications..."
-                rows={3}
-              />
-            </div>
           )}
 
           {type === "research" && (

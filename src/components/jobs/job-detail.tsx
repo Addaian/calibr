@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   MapPin,
@@ -8,8 +9,8 @@ import {
   DollarSign,
   FileText,
   Mail,
+  Calendar,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { JobKeywords } from "./job-keywords";
+import { StatusSwitcher } from "./status-switcher";
 import type { JobPosting } from "@/types/jobs";
 
 interface JobDetailProps {
@@ -26,11 +28,22 @@ interface JobDetailProps {
 }
 
 export function JobDetail({ job }: JobDetailProps) {
+  const [status, setStatus] = useState(job.status);
+  const [statusDate, setStatusDate] = useState(job.status_date);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">{job.title}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold">{job.title}</h1>
+            <StatusSwitcher
+              jobId={job.id}
+              status={status}
+              statusDate={statusDate}
+              onUpdate={(s, d) => { setStatus(s); setStatusDate(d); }}
+            />
+          </div>
           <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
             {job.company && (
               <span className="flex items-center gap-1.5">
@@ -54,6 +67,17 @@ export function JobDetail({ job }: JobDetailProps) {
               <span className="flex items-center gap-1.5">
                 <DollarSign className="size-4" />
                 {job.salary_range}
+              </span>
+            )}
+            {statusDate && (
+              <span className="flex items-center gap-1.5">
+                <Calendar className="size-4" />
+                {new Date(statusDate).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                  timeZone: "UTC",
+                })}
               </span>
             )}
           </div>

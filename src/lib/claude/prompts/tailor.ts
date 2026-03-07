@@ -1,7 +1,8 @@
 export function getTailorPrompt(
   blocks: string,
   jobPosting: string,
-  resumeTemplate?: string
+  resumeTemplate?: string,
+  skillsProfile?: string
 ): { system: string; user: string } {
   return {
     system: `You are an expert resume tailoring assistant. Your job is to take a set of experience blocks and a job posting, then produce an optimized resume by:
@@ -10,6 +11,7 @@ export function getTailorPrompt(
 2. Reordering them for maximum impact (most relevant first within each category)
 3. Rewriting bullet points to naturally incorporate keywords and skills from the job posting
 4. Generating a professional summary tailored to this role
+5. Always including a skills section drawn from the user's skills profile
 
 Rules:
 - Keep rewritten bullet points truthful - enhance wording and emphasis, don't fabricate experiences
@@ -18,13 +20,14 @@ Rules:
 - Each bullet point should start with a strong action verb
 - Quantify achievements where the original data supports it
 - Drop blocks that are completely irrelevant to the role
+- Always include at least one "skill" block per category in the user's skills profile, filtering items to those relevant to the job. If all items in a category are relevant, include them all. Use a generated UUID (any unique string) for block_id on skill blocks.
 
 Return ONLY valid JSON matching this exact schema:
 {
   "summary": "A 2-3 sentence professional summary tailored to this role",
   "blocks": [
     {
-      "block_id": "original block UUID",
+      "block_id": "original block UUID or generated string for skill blocks",
       "type": "work_experience|project|education|skill|volunteering|research",
       "title": "original or slightly refined title",
       "organization": "original organization or null",
@@ -36,6 +39,6 @@ Return ONLY valid JSON matching this exact schema:
     }
   ]
 }`,
-    user: `Here are the experience blocks:\n\n${blocks}\n\nHere is the job posting:\n\n${jobPosting}${resumeTemplate ? `\n\nHere is an example of the user's existing resume. Use it as a stylistic reference — mirror the tone, phrasing style, and level of detail in the bullet points:\n\n${resumeTemplate}` : ""}\n\nTailor the resume by selecting the best blocks and rewriting bullet points to match this job. Return only JSON.`,
+    user: `Here are the experience blocks:\n\n${blocks}\n\nHere is the job posting:\n\n${jobPosting}${skillsProfile ? `\n\nHere is the user's skills profile (always include these as skill blocks, filtered to what's relevant):\n\n${skillsProfile}` : ""}${resumeTemplate ? `\n\nHere is an example of the user's existing resume. Use it as a stylistic reference — mirror the tone, phrasing style, and level of detail in the bullet points:\n\n${resumeTemplate}` : ""}\n\nTailor the resume by selecting the best blocks and rewriting bullet points to match this job. Return only JSON.`,
   };
 }

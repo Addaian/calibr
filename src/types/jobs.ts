@@ -18,6 +18,7 @@ export interface JobPosting {
     about?: string;
   };
   status: "active" | "applied" | "interview" | "rejected" | "offer";
+  status_date: string | null;
   created_at: string;
   updated_at: string;
 }

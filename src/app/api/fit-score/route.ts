@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     const { block_ids, job_posting_id } = parsed.data;
 
-    const [blocksResult, jobResult] = await Promise.all([
+    const [blocksResult, jobResult, profileResult] = await Promise.all([
       supabase
         .from("experience_blocks")
         .select("*")
@@ -39,6 +39,11 @@ export async function POST(request: Request) {
         .select("*")
         .eq("id", job_posting_id)
         .eq("user_id", user.id)
+        .single(),
+      supabase
+        .from("user_profiles")
+        .select("skills")
+        .eq("id", user.id)
         .single(),
     ]);
 
@@ -56,9 +61,15 @@ export async function POST(request: Request) {
       );
     }
 
+    const skillCategories: { category: string; items: string[] }[] =
+      Array.isArray(profileResult.data?.skills) ? profileResult.data.skills : [];
+    const skillsProfile = skillCategories.length
+      ? skillCategories.map((c) => `- ${c.category}: ${c.items.join(", ")}`).join("\n")
+      : undefined;
+
     const blocksText = JSON.stringify(blocksResult.data, null, 2);
     const jobText = JSON.stringify(jobResult.data, null, 2);
-    const prompt = getFitScorePrompt(blocksText, jobText);
+    const prompt = getFitScorePrompt(blocksText, jobText, skillsProfile);
 
     const claude = getClaudeClient();
     const message = await claude.messages.create({

@@ -1,6 +1,7 @@
 export function getFitScorePrompt(
   blocks: string,
-  jobPosting: string
+  jobPosting: string,
+  skillsProfile?: string
 ): { system: string; user: string } {
   return {
     system: `You are a resume-job fit analyst. Evaluate how well a candidate's experience blocks match a job posting.
@@ -25,6 +26,6 @@ Return ONLY valid JSON:
   "cons": ["specific gap 1", "specific gap 2"],
   "suggestions": ["actionable suggestion 1", "actionable suggestion 2"]
 }`,
-    user: `Candidate's experience blocks:\n\n${blocks}\n\nJob posting:\n\n${jobPosting}\n\nAnalyze the fit and return only JSON.`,
+    user: `Candidate's experience blocks:\n\n${blocks}${skillsProfile ? `\n\nCandidate's skills profile:\n\n${skillsProfile}` : ""}\n\nJob posting:\n\n${jobPosting}\n\nAnalyze the fit and return only JSON.`,
   };
 }

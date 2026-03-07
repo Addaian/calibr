@@ -12,7 +12,6 @@ const typeLabels: Record<BlockType, string> = {
   work_experience: "Work Experience",
   project: "Project",
   education: "Education",
-  skill: "Skill",
   volunteering: "Volunteering",
   research: "Research",
 };
@@ -21,7 +20,6 @@ const typeBadgeColors: Record<BlockType, string> = {
   work_experience: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
   project: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
   education: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  skill: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
   volunteering: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
   research: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300",
 };

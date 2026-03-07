@@ -2,7 +2,6 @@ export type BlockType =
   | "work_experience"
   | "project"
   | "education"
-  | "skill"
   | "volunteering"
   | "research";
 

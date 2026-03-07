@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Trash2, MapPin, Building2, Tag } from "lucide-react";
+import { Trash2, MapPin, Building2, Tag, Calendar } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -11,20 +12,9 @@ import {
   CardFooter,
   CardAction,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StatusSwitcher } from "./status-switcher";
 import type { JobPosting } from "@/types/jobs";
-
-const statusConfig: Record<
-  JobPosting["status"],
-  { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
-> = {
-  active: { label: "Active", variant: "default" },
-  applied: { label: "Applied", variant: "secondary" },
-  interview: { label: "Interview", variant: "outline" },
-  rejected: { label: "Rejected", variant: "destructive" },
-  offer: { label: "Offer", variant: "default" },
-};
 
 interface JobCardProps {
   job: JobPosting;
@@ -32,7 +22,8 @@ interface JobCardProps {
 }
 
 export function JobCard({ job, onDelete }: JobCardProps) {
-  const status = statusConfig[job.status];
+  const [currentStatus, setCurrentStatus] = useState(job.status);
+  const [currentStatusDate, setCurrentStatusDate] = useState(job.status_date);
   const keywordCount =
     job.keywords.length +
     job.required_skills.length +
@@ -59,24 +50,33 @@ export function JobCard({ job, onDelete }: JobCardProps) {
           )}
         </CardDescription>
         <CardAction>
-          <Badge variant={status.variant}>{status.label}</Badge>
+          <StatusSwitcher
+            jobId={job.id}
+            status={currentStatus}
+            statusDate={currentStatusDate}
+            onUpdate={(s, d) => { setCurrentStatus(s); setCurrentStatusDate(d); }}
+          />
         </CardAction>
       </CardHeader>
 
       <CardContent>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Tag className="size-3" />
-          <span>
-            {keywordCount} keyword{keywordCount !== 1 ? "s" : ""}
-          </span>
-          <span>&middot;</span>
-          <span>
-            {new Date(job.created_at).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </span>
+          <span>{keywordCount} keyword{keywordCount !== 1 ? "s" : ""}</span>
+          {currentStatusDate && (
+            <>
+              <span>&middot;</span>
+              <Calendar className="size-3" />
+              <span>
+                {new Date(currentStatusDate).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                  timeZone: "UTC",
+                })}
+              </span>
+            </>
+          )}
         </div>
       </CardContent>
 

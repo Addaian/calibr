@@ -1,14 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import useSWR from "swr";
-import { Plus, LayoutGrid, List, Building2, MapPin, Tag, Trash2 } from "lucide-react";
+import { Plus, Building2, MapPin, Trash2, ArrowUpDown, Calendar, AlignJustify, List } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { JobCard } from "@/components/jobs/job-card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { StatusSwitcher } from "@/components/jobs/status-switcher";
 import type { JobPosting } from "@/types/jobs";
 
 const fetcher = (url: string) =>
@@ -17,31 +23,72 @@ const fetcher = (url: string) =>
     return res.json();
   });
 
-const statusConfig: Record<
-  JobPosting["status"],
-  { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
-> = {
-  active: { label: "Active", variant: "default" },
-  applied: { label: "Applied", variant: "secondary" },
-  interview: { label: "Interview", variant: "outline" },
-  rejected: { label: "Rejected", variant: "destructive" },
-  offer: { label: "Offer", variant: "default" },
+type SortKey = "status_date" | "status" | "location" | "company" | "title";
+
+const STATUS_ORDER: Record<string, number> = {
+  active: 0,
+  applied: 1,
+  interview: 2,
+  offer: 3,
+  rejected: 4,
 };
 
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "status_date", label: "Date" },
+  { value: "status", label: "Status" },
+  { value: "location", label: "City" },
+  { value: "company", label: "Company" },
+  { value: "title", label: "Role" },
+];
+
+function sortJobs(jobs: JobPosting[], key: SortKey): JobPosting[] {
+  return [...jobs].sort((a, b) => {
+    if (key === "status_date") {
+      const da = a.status_date ?? "";
+      const db = b.status_date ?? "";
+      if (!da && !db) return 0;
+      if (!da) return 1;
+      if (!db) return -1;
+      return db.localeCompare(da);
+    }
+    if (key === "status") {
+      return (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99);
+    }
+    const av = (a[key] ?? "").toLowerCase();
+    const bv = (b[key] ?? "").toLowerCase();
+    return av.localeCompare(bv);
+  });
+}
+
+function formatStatusDate(d: string | null) {
+  if (!d) return null;
+  return new Date(d).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export default function JobsPage() {
-  const [view, setView] = useState<"grid" | "list">("grid");
+  const [sortKey, setSortKey] = useState<SortKey>("status_date");
+  const [compact, setCompact] = useState(false);
   const { data, error, isLoading, mutate } = useSWR<JobPosting[]>("/api/jobs", fetcher);
+
+  const sorted = useMemo(() => sortJobs(data ?? [], sortKey), [data, sortKey]);
 
   async function handleDelete(id: string) {
     try {
       const res = await fetch(`/api/jobs/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete job");
+      if (!res.ok) throw new Error();
       mutate((jobs) => jobs?.filter((j) => j.id !== id), false);
       toast.success("Job posting deleted");
     } catch {
       toast.error("Failed to delete job posting");
     }
   }
+
+  const sortLabel = SORT_OPTIONS.find((o) => o.value === sortKey)?.label ?? "Sort";
 
   return (
     <div className="space-y-6">
@@ -55,38 +102,58 @@ export default function JobsPage() {
         </Button>
       </div>
 
-      <div className="flex items-center justify-end">
+      <div className="flex items-center gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <ArrowUpDown className="h-3.5 w-3.5" />
+              Sort: {sortLabel}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuRadioGroup value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+              {SORT_OPTIONS.map((o) => (
+                <DropdownMenuRadioItem key={o.value} value={o.value}>
+                  {o.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <div className="flex items-center rounded-md border p-0.5">
           <Button
-            variant={view === "grid" ? "secondary" : "ghost"}
+            variant={!compact ? "secondary" : "ghost"}
             size="icon"
             className="h-7 w-7"
-            onClick={() => setView("grid")}
-          >
-            <LayoutGrid className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant={view === "list" ? "secondary" : "ghost"}
-            size="icon"
-            className="h-7 w-7"
-            onClick={() => setView("list")}
+            onClick={() => setCompact(false)}
+            title="Normal"
           >
             <List className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant={compact ? "secondary" : "ghost"}
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => setCompact(true)}
+            title="Compact"
+          >
+            <AlignJustify className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
 
       {isLoading && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="space-y-3 rounded-xl border p-6">
-              <Skeleton className="h-5 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-4 w-1/3" />
-              <div className="flex justify-between pt-4">
-                <Skeleton className="h-8 w-24" />
-                <Skeleton className="size-8" />
+        <div className="divide-y rounded-lg border">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-4 px-4 py-4">
+              <Skeleton className="h-5 w-24 shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-48" />
+                <Skeleton className="h-3 w-64" />
               </div>
+              <Skeleton className="h-4 w-24 shrink-0" />
+              <Skeleton className="h-7 w-14 shrink-0" />
             </div>
           ))}
         </div>
@@ -110,69 +177,107 @@ export default function JobsPage() {
         </div>
       )}
 
-      {data && data.length > 0 && view === "grid" && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {data.map((job) => (
-            <JobCard key={job.id} job={job} onDelete={handleDelete} />
-          ))}
-        </div>
-      )}
+      {sorted.length > 0 && (
+        <div className="rounded-lg border">
+          {/* Header */}
+          <div className={`hidden grid-cols-[160px_1fr_140px_140px_120px_80px] gap-4 border-b bg-muted/50 px-4 text-xs font-medium text-muted-foreground sm:grid ${compact ? "py-1.5" : "py-2"}`}>
+            <span>Status</span>
+            <span>Role</span>
+            <span>Company</span>
+            <span>Location</span>
+            <span>Date</span>
+            <span />
+          </div>
 
-      {data && data.length > 0 && view === "list" && (
-        <div className="divide-y rounded-lg border">
-          {data.map((job) => {
-            const status = statusConfig[job.status];
-            const keywordCount =
-              job.keywords.length + job.required_skills.length + job.preferred_skills.length;
-            return (
-              <div key={job.id} className="flex items-center gap-4 px-4 py-3">
-                <Badge variant={status.variant} className="w-20 shrink-0 justify-center">
-                  {status.label}
-                </Badge>
-                <div className="min-w-0 flex-1">
-                  <Link href={`/jobs/${job.id}`} className="truncate text-sm font-medium hover:underline">
-                    {job.title}
-                  </Link>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-                    {job.company && (
-                      <span className="flex items-center gap-0.5">
-                        <Building2 className="h-3 w-3" />{job.company}
-                      </span>
-                    )}
-                    {job.location && (
-                      <span className="flex items-center gap-0.5">
-                        <MapPin className="h-3 w-3" />{job.location}
-                      </span>
-                    )}
-                    {keywordCount > 0 && (
-                      <span className="flex items-center gap-0.5">
-                        <Tag className="h-3 w-3" />{keywordCount} keyword{keywordCount !== 1 ? "s" : ""}
-                      </span>
+          <div className="divide-y">
+            {sorted.map((job) => {
+              const dateLabel = formatStatusDate(job.status_date);
+              return (
+                <div
+                  key={job.id}
+                  className={`grid grid-cols-1 gap-2 px-4 sm:grid-cols-[160px_1fr_140px_140px_120px_80px] sm:items-center sm:gap-4 ${compact ? "py-1.5" : "py-3"}`}
+                >
+                  {/* Status */}
+                  <div>
+                    <StatusSwitcher
+                      jobId={job.id}
+                      status={job.status}
+                      statusDate={job.status_date}
+                      onUpdate={(s, d) =>
+                        mutate(
+                          (jobs) =>
+                            jobs?.map((j) =>
+                              j.id === job.id ? { ...j, status: s, status_date: d } : j
+                            ),
+                          false
+                        )
+                      }
+                    />
+                  </div>
+
+                  {/* Role */}
+                  <div>
+                    <Link
+                      href={`/jobs/${job.id}`}
+                      className="text-sm font-medium hover:underline"
+                    >
+                      {job.title}
+                    </Link>
+                  </div>
+
+                  {/* Company */}
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    {job.company ? (
+                      <>
+                        <Building2 className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{job.company}</span>
+                      </>
+                    ) : (
+                      <span className="text-xs text-muted-foreground/50">—</span>
                     )}
                   </div>
+
+                  {/* Location */}
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    {job.location ? (
+                      <>
+                        <MapPin className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{job.location}</span>
+                      </>
+                    ) : (
+                      <span className="text-xs text-muted-foreground/50">—</span>
+                    )}
+                  </div>
+
+                  {/* Date */}
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    {dateLabel ? (
+                      <>
+                        <Calendar className="h-3.5 w-3.5 shrink-0" />
+                        <span>{dateLabel}</span>
+                      </>
+                    ) : (
+                      <span className="text-xs text-muted-foreground/50">—</span>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center justify-end gap-1">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/jobs/${job.id}`}>View</Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => handleDelete(job.id)}
+                    >
+                      <Trash2 className="size-4 text-muted-foreground" />
+                    </Button>
+                  </div>
                 </div>
-                <span className="shrink-0 text-xs text-muted-foreground">
-                  {new Date(job.created_at).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </span>
-                <div className="flex shrink-0 gap-1">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/jobs/${job.id}`}>View</Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => handleDelete(job.id)}
-                  >
-                    <Trash2 className="size-4 text-muted-foreground" />
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

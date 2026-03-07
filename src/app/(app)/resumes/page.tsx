@@ -11,7 +11,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import type { GeneratedResume } from "@/types/resumes";
 import type { CoverLetter } from "@/types/cover-letters";
-import { FileText, Trash2, Upload, Sparkles, Mail, Copy, Download, FileDown } from "lucide-react";
+import type { ResumeProfile } from "@/components/resume/resume-pdf";
+import { ResumeCard } from "@/components/resume/resume-card";
+import { FileText, Mail, Copy, Download, FileDown, Upload, Sparkles } from "lucide-react";
 import { downloadAsPdf, downloadAsDocx } from "@/lib/cover-letter-download";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -39,6 +41,7 @@ export default function ResumesPage() {
     useSWR<GeneratedResume[]>("/api/resumes", fetcher);
   const { data: coverLetters, isLoading: clLoading, error: clError } =
     useSWR<CoverLetterWithJob[]>("/api/cover-letters", fetcher);
+  const { data: profile } = useSWR<ResumeProfile>("/api/profile", fetcher);
 
   async function handleDeleteResume(id: string) {
     try {
@@ -142,49 +145,12 @@ export default function ResumesPage() {
           {filtered.length > 0 && (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((resume) => (
-                <Card key={resume.id} className="flex flex-col">
-                  <CardHeader className="flex-row items-start justify-between gap-2 pb-2">
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <CardTitle className="text-base truncate">{resume.name}</CardTitle>
-                      <Badge variant="outline" className="text-xs">
-                        {resume.source === "uploaded" ? (
-                          <><Upload className="mr-1 h-3 w-3" />Uploaded</>
-                        ) : (
-                          <><Sparkles className="mr-1 h-3 w-3" />AI Generated</>
-                        )}
-                      </Badge>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-                      onClick={() => handleDeleteResume(resume.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </CardHeader>
-                  <CardContent className="flex flex-1 flex-col justify-between gap-4">
-                    <div className="flex flex-wrap items-center gap-2">
-                      {resume.fit_score !== null && (
-                        <Badge variant={getScoreColor(resume.fit_score)}>
-                          {resume.fit_score}% fit
-                        </Badge>
-                      )}
-                      <span className="text-xs text-muted-foreground">
-                        {resume.selected_block_ids?.length ?? 0} blocks
-                      </span>
-                    </div>
-                    {resume.source === "generated" && (
-                      <div className="flex gap-2">
-                        <Link href={`/resumes/${resume.id}/export`} className="flex-1">
-                          <Button variant="outline" size="sm" className="w-full">
-                            Export PDF
-                          </Button>
-                        </Link>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                <ResumeCard
+                  key={resume.id}
+                  resume={resume}
+                  profile={profile}
+                  onDelete={handleDeleteResume}
+                />
               ))}
             </div>
           )}
