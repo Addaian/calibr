@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useParams, useSearchParams } from "next/navigation";
 import useSWR from "swr";
@@ -7,8 +8,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { GeneratedResume } from "@/types/resumes";
+import type { TailoredContent } from "@/types/resumes";
 import type { ResumeProfile } from "@/components/resume/resume-pdf";
 import { KeywordMatchPanel } from "@/components/resume/keyword-match-panel";
+import { ResumeChat } from "@/components/resume/resume-chat";
 import { ArrowLeft } from "lucide-react";
 
 const ResumePreview = dynamic(
@@ -44,6 +47,11 @@ export default function ExportPage() {
     fetcher
   );
 
+  const [content, setContent] = useState<TailoredContent | null>(null);
+
+  // Use local state if set (after a chat edit), otherwise fall back to DB value
+  const activeContent = content ?? resume?.tailored_content;
+
   if (resumeLoading || profileLoading) {
     return (
       <div className="space-y-4 p-6">
@@ -72,10 +80,15 @@ export default function ExportPage() {
         <h1 className="text-2xl font-bold">{resume.name}</h1>
       </div>
 
-      <KeywordMatchPanel jobId={resume.job_posting_id} content={resume.tailored_content} />
+      <KeywordMatchPanel jobId={resume.job_posting_id} content={activeContent!} />
+
+      <ResumeChat
+        resumeId={params.id as string}
+        onUpdate={setContent}
+      />
 
       <ResumePreview
-        content={resume.tailored_content}
+        content={activeContent!}
         profile={profile}
         filename={resume.name || "resume"}
         resumeId={params.id as string}
