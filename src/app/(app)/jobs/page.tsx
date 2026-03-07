@@ -14,10 +14,12 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 import { StatusSwitcher, type Status } from "@/components/jobs/status-switcher";
 import { JobKanbanBoard } from "@/components/jobs/job-kanban-board";
 import { JobSankeyView } from "@/components/jobs/job-sankey";
 import type { JobPosting } from "@/types/jobs";
+import type { GeneratedResume } from "@/types/resumes";
 
 const fetcher = (url: string) =>
   fetch(url).then((res) => {
@@ -29,10 +31,19 @@ type SortKey = "status_date" | "status" | "location" | "company" | "title";
 
 const STATUS_ORDER: Record<string, number> = {
   active: 0,
-  applied: 1,
-  interview: 2,
-  offer: 3,
-  rejected: 4,
+  applying: 1,
+  applied: 2,
+  screening: 3,
+  interview: 4,
+  assessment: 5,
+  final_round: 6,
+  offer: 7,
+  negotiating: 8,
+  accepted: 9,
+  rejected: 10,
+  withdrawn: 11,
+  ghosted: 12,
+  declined: 13,
 };
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
@@ -83,6 +94,19 @@ export default function JobsPage() {
     if (saved) setViewMode(saved);
   }, []);
   const { data, error, isLoading, mutate } = useSWR<JobPosting[]>("/api/jobs", fetcher);
+  const { data: resumes } = useSWR<GeneratedResume[]>("/api/resumes", fetcher);
+
+  // Best fit score per job_posting_id
+  const bestScoreByJob = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const r of resumes ?? []) {
+      if (r.job_posting_id && r.fit_score !== null) {
+        const prev = map.get(r.job_posting_id) ?? -1;
+        if (r.fit_score > prev) map.set(r.job_posting_id, r.fit_score);
+      }
+    }
+    return map;
+  }, [resumes]);
 
   function handleViewMode(mode: ViewMode) {
     setViewMode(mode);
@@ -239,12 +263,13 @@ export default function JobsPage() {
       {viewMode !== "kanban" && viewMode !== "sankey" && sorted.length > 0 && (
         <div className="rounded-lg border">
           {/* Header */}
-          <div className={`hidden grid-cols-[160px_140px_1fr_140px_120px_80px] gap-4 border-b bg-muted/50 px-4 text-xs font-medium text-muted-foreground sm:grid ${compact ? "py-1.5" : "py-2"}`}>
+          <div className={`hidden grid-cols-[160px_140px_1fr_140px_120px_64px_80px] gap-4 border-b bg-muted/50 px-4 text-xs font-medium text-muted-foreground sm:grid ${compact ? "py-1.5" : "py-2"}`}>
             <span>Status</span>
             <span>Company</span>
             <span>Role</span>
             <span>Location</span>
             <span>Date</span>
+            <span>Fit</span>
             <span />
           </div>
 
@@ -254,7 +279,7 @@ export default function JobsPage() {
               return (
                 <div
                   key={job.id}
-                  className={`grid grid-cols-1 gap-2 px-4 sm:grid-cols-[160px_140px_1fr_140px_120px_80px] sm:items-center sm:gap-4 ${compact ? "py-1.5" : "py-3"}`}
+                  className={`grid grid-cols-1 gap-2 px-4 sm:grid-cols-[160px_140px_1fr_140px_120px_64px_80px] sm:items-center sm:gap-4 ${compact ? "py-1.5" : "py-3"}`}
                 >
                   {/* Status */}
                   <div>
@@ -318,6 +343,22 @@ export default function JobsPage() {
                     ) : (
                       <span className="text-xs text-muted-foreground/50">—</span>
                     )}
+                  </div>
+
+                  {/* Fit score */}
+                  <div>
+                    {(() => {
+                      const score = bestScoreByJob.get(job.id);
+                      if (score === undefined) return <span className="text-xs text-muted-foreground/40">—</span>;
+                      return (
+                        <Badge
+                          variant={score >= 70 ? "default" : score >= 50 ? "secondary" : "destructive"}
+                          className="text-xs"
+                        >
+                          {score}%
+                        </Badge>
+                      );
+                    })()}
                   </div>
 
                   {/* Actions */}

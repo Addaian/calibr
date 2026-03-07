@@ -92,7 +92,7 @@ export default function TailorPage() {
       setStep(1);
       toast.success("Resume tailored successfully");
 
-      fetchFitScore();
+      fetchFitScore(data.id);
     } catch {
       toast.error("Failed to tailor resume");
     } finally {
@@ -100,7 +100,7 @@ export default function TailorPage() {
     }
   }
 
-  async function fetchFitScore() {
+  async function fetchFitScore(resumeId?: string) {
     setScoringLoading(true);
     try {
       const res = await fetch("/api/fit-score", {
@@ -109,7 +109,7 @@ export default function TailorPage() {
         body: JSON.stringify({
           block_ids: selectedIds,
           job_posting_id: jobId,
-          resume_id: resume?.id,
+          resume_id: resumeId,
         }),
       });
 

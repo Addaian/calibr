@@ -6,17 +6,18 @@ export const parsedJobSchema = z.object({
   location: z.string().nullable(),
   employment_type: z.string().nullable(),
   salary_range: z.string().nullable(),
-  required_skills: z.array(z.string()).default([]),
-  preferred_skills: z.array(z.string()).default([]),
-  keywords: z.array(z.string()).default([]),
-  responsibilities: z.array(z.string()).default([]),
+  required_skills: z.array(z.string()).nullable().transform(v => v ?? []),
+  preferred_skills: z.array(z.string()).nullable().transform(v => v ?? []),
+  keywords: z.array(z.string()).nullable().transform(v => v ?? []),
+  responsibilities: z.array(z.string()).nullable().transform(v => v ?? []),
   company_info: z
     .object({
-      industry: z.string().optional(),
-      size: z.string().optional(),
-      about: z.string().optional(),
+      industry: z.string().nullable().optional(),
+      size: z.string().nullable().optional(),
+      about: z.string().nullable().optional(),
     })
-    .default({}),
+    .nullable()
+    .transform(v => v ?? {}),
   education_requirement: z
     .enum(["completed", "in_progress_ok", "none"])
     .nullable()

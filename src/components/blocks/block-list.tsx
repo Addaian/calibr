@@ -100,7 +100,7 @@ export function BlockList({ blocks, onDelete }: BlockListProps) {
       {filterTabs.map((tab) => (
         <TabsContent key={tab.value} value={tab.value}>
           {filteredBlocks.length === 0 ? empty : view === "grid" ? (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
               {filteredBlocks.map((block) => (
                 <BlockCard key={block.id} block={block} onDelete={onDelete} />
               ))}

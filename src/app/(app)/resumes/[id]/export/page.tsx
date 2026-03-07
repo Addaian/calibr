@@ -12,6 +12,7 @@ import type { TailoredContent } from "@/types/resumes";
 import type { ResumeProfile } from "@/components/resume/resume-pdf";
 import { KeywordMatchPanel } from "@/components/resume/keyword-match-panel";
 import { ResumeChat } from "@/components/resume/resume-chat";
+import { FitScoreDisplay } from "@/components/tailor/fit-score-display";
 import { ArrowLeft } from "lucide-react";
 
 const ResumePreview = dynamic(
@@ -79,6 +80,10 @@ export default function ExportPage() {
         </Link>
         <h1 className="text-2xl font-bold">{resume.name}</h1>
       </div>
+
+      {resume.fit_score !== null && resume.fit_analysis?.dimensions && (
+        <FitScoreDisplay score={resume.fit_score} analysis={resume.fit_analysis} />
+      )}
 
       <KeywordMatchPanel jobId={resume.job_posting_id} content={activeContent!} />
 

@@ -69,18 +69,18 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
 
   return (
     <Card className="group relative">
-      <CardHeader className="pb-0">
+      <CardHeader className="px-3 pb-0.5 pt-2">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 space-y-1.5">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
             <Badge
               variant="secondary"
-              className={typeBadgeColors[block.type]}
+              className={`shrink-0 px-1.5 py-0 text-[10px] ${typeBadgeColors[block.type]}`}
             >
               {typeLabels[block.type]}
             </Badge>
-            <CardTitle className="text-base">{block.title}</CardTitle>
+            <CardTitle className="truncate text-sm">{block.title}</CardTitle>
           </div>
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="flex shrink-0 items-center gap-0.5">
             {confirming && (
               <span className="animate-in fade-in text-xs font-medium text-destructive">
                 Delete?
@@ -103,27 +103,27 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2">
-        {block.organization && (
-          <p className="text-sm text-muted-foreground">{block.organization}</p>
-        )}
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+      <CardContent className="space-y-0.5 px-3 pb-2">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+          {block.organization && (
+            <span className="font-medium">{block.organization}</span>
+          )}
           {block.location && (
-            <span className="inline-flex items-center gap-1">
+            <span className="inline-flex items-center gap-0.5">
               <MapPin className="size-3" />
               {block.location}
             </span>
           )}
           {dateRange && (
-            <span className="inline-flex items-center gap-1">
+            <span className="inline-flex items-center gap-0.5">
               <Calendar className="size-3" />
               {dateRange}
             </span>
           )}
         </div>
         {block.bullet_points.length > 0 && (
-          <ul className="list-inside list-disc space-y-0.5 text-sm text-muted-foreground">
-            {block.bullet_points.slice(0, 2).map((point, i) => (
+          <ul className="list-inside list-disc space-y-0 text-xs text-muted-foreground">
+            {block.bullet_points.slice(0, 1).map((point, i) => (
               <li key={i} className="truncate">
                 {point}
               </li>
@@ -131,12 +131,15 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
           </ul>
         )}
         {block.technologies.length > 0 && (
-          <div className="flex flex-wrap gap-1 pt-1">
-            {block.technologies.map((tech) => (
-              <Badge key={tech} variant="outline" className="text-xs font-normal">
+          <div className="flex flex-wrap gap-1">
+            {block.technologies.slice(0, 5).map((tech) => (
+              <Badge key={tech} variant="outline" className="px-1.5 py-0 text-[10px] font-normal">
                 {tech}
               </Badge>
             ))}
+            {block.technologies.length > 5 && (
+              <span className="text-[10px] text-muted-foreground">+{block.technologies.length - 5}</span>
+            )}
           </div>
         )}
       </CardContent>
