@@ -12,7 +12,7 @@ import { TailoringPreview } from "@/components/tailor/tailoring-preview";
 import { FitScoreDisplay } from "@/components/tailor/fit-score-display";
 import type { ExperienceBlock } from "@/types/blocks";
 import type { JobPosting } from "@/types/jobs";
-import type { GeneratedResume } from "@/types/resumes";
+import type { GeneratedResume, FitAnalysis } from "@/types/resumes";
 import { ArrowLeft, ArrowRight, Loader2, Sparkles, Upload, X, FileText } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -36,12 +36,7 @@ export default function TailorPage() {
   const [templateLoading, setTemplateLoading] = useState(false);
   const [styleReason, setStyleReason] = useState<string>("");
   const [detectedSections, setDetectedSections] = useState<string[]>([]);
-  const [fitScore, setFitScore] = useState<{
-    score: number;
-    pros: string[];
-    cons: string[];
-    suggestions: string[];
-  } | null>(null);
+  const [fitScore, setFitScore] = useState<FitAnalysis | null>(null);
 
   async function handleTemplateUpload(file: File) {
     if (file.type !== "application/pdf") {
@@ -114,6 +109,7 @@ export default function TailorPage() {
         body: JSON.stringify({
           block_ids: selectedIds,
           job_posting_id: jobId,
+          resume_id: resume?.id,
         }),
       });
 
@@ -271,7 +267,7 @@ export default function TailorPage() {
           )}
 
           {fitScore && (
-            <FitScoreDisplay score={fitScore.score} analysis={fitScore} />
+            <FitScoreDisplay score={fitScore.totalScore} analysis={fitScore} />
           )}
 
           <div className="flex justify-between">

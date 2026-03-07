@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import useSWR from "swr";
-import { Plus, Building2, MapPin, Trash2, ArrowUpDown, Calendar, AlignJustify, List, LayoutGrid } from "lucide-react";
+import { Plus, Building2, MapPin, Trash2, ArrowUpDown, Calendar, AlignJustify, List, LayoutGrid, GitFork } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { StatusSwitcher, type Status } from "@/components/jobs/status-switcher";
 import { JobKanbanBoard } from "@/components/jobs/job-kanban-board";
+import { JobSankeyView } from "@/components/jobs/job-sankey";
 import type { JobPosting } from "@/types/jobs";
 
 const fetcher = (url: string) =>
@@ -71,7 +72,7 @@ function formatStatusDate(d: string | null) {
   });
 }
 
-type ViewMode = "list" | "compact" | "kanban";
+type ViewMode = "list" | "compact" | "kanban" | "sankey";
 
 export default function JobsPage() {
   const [sortKey, setSortKey] = useState<SortKey>("status_date");
@@ -133,7 +134,7 @@ export default function JobsPage() {
       </div>
 
       <div className="flex items-center gap-2">
-        {viewMode !== "kanban" && (
+        {viewMode !== "kanban" && viewMode !== "sankey" && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1.5">
@@ -181,6 +182,15 @@ export default function JobsPage() {
           >
             <LayoutGrid className="h-3.5 w-3.5" />
           </Button>
+          <Button
+            variant={viewMode === "sankey" ? "secondary" : "ghost"}
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => handleViewMode("sankey")}
+            title="Pipeline"
+          >
+            <GitFork className="h-3.5 w-3.5" />
+          </Button>
         </div>
       </div>
 
@@ -222,7 +232,11 @@ export default function JobsPage() {
         <JobKanbanBoard jobs={data} onStatusChange={handleStatusChange} />
       )}
 
-      {viewMode !== "kanban" && sorted.length > 0 && (
+      {viewMode === "sankey" && data && (
+        <JobSankeyView jobs={data} />
+      )}
+
+      {viewMode !== "kanban" && viewMode !== "sankey" && sorted.length > 0 && (
         <div className="rounded-lg border">
           {/* Header */}
           <div className={`hidden grid-cols-[160px_140px_1fr_140px_120px_80px] gap-4 border-b bg-muted/50 px-4 text-xs font-medium text-muted-foreground sm:grid ${compact ? "py-1.5" : "py-2"}`}>

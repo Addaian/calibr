@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 export const fitScoreOutputSchema = z.object({
-  score: z.number().int().min(0).max(100),
+  experience_relevance: z.number().int().min(0).max(30),
+  overall_impression: z.number().int().min(0).max(10),
   pros: z.array(z.string()),
   cons: z.array(z.string()),
   suggestions: z.array(z.string()),

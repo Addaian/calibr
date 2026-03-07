@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import useSWR from "swr";
 import {
   MapPin,
   Building2,
@@ -25,6 +26,20 @@ import { JobKeywords } from "./job-keywords";
 import { JobDocuments } from "./job-documents";
 import { StatusSwitcher } from "./status-switcher";
 import type { JobPosting } from "@/types/jobs";
+import type { GeneratedResume } from "@/types/resumes";
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
+
+function getBestScore(resumes: GeneratedResume[]): number | null {
+  const scores = resumes.map((r) => r.fit_score).filter((s): s is number => s !== null);
+  return scores.length > 0 ? Math.max(...scores) : null;
+}
+
+function fitScoreBadgeVariant(score: number): "default" | "secondary" | "destructive" | "outline" {
+  if (score >= 70) return "default";
+  if (score >= 50) return "secondary";
+  return "destructive";
+}
 
 interface JobDetailProps {
   job: JobPosting;
@@ -33,6 +48,8 @@ interface JobDetailProps {
 export function JobDetail({ job }: JobDetailProps) {
   const [status, setStatus] = useState(job.status);
   const [statusDate, setStatusDate] = useState(job.status_date ?? null);
+  const { data: resumes } = useSWR<GeneratedResume[]>(`/api/resumes?job_id=${job.id}`, fetcher);
+  const bestScore = resumes ? getBestScore(resumes) : null;
 
   const requiredSkills = job.required_skills ?? [];
   const preferredSkills = job.preferred_skills ?? [];
@@ -52,6 +69,11 @@ export function JobDetail({ job }: JobDetailProps) {
               statusDate={statusDate}
               onUpdate={(s, d) => { setStatus(s); setStatusDate(d); }}
             />
+            {bestScore !== null && (
+              <Badge variant={fitScoreBadgeVariant(bestScore)} className="text-sm">
+                {bestScore}% fit
+              </Badge>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
             {job.company && (

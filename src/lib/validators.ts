@@ -68,6 +68,7 @@ export const tailorSchema = z.object({
 export const fitScoreSchema = z.object({
   block_ids: z.array(z.string().uuid()).min(1),
   job_posting_id: z.string().uuid(),
+  resume_id: z.string().uuid().optional(),
 });
 
 export const coverLetterSchema = z.object({

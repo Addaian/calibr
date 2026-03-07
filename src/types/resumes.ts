@@ -16,7 +16,16 @@ export interface TailoredContent {
   blocks: TailoredBlock[];
 }
 
+export interface FitScoreDimension {
+  label: string;
+  score: number;
+  maxScore: number;
+  source: "algorithmic" | "ai";
+}
+
 export interface FitAnalysis {
+  totalScore: number;
+  dimensions: FitScoreDimension[];
   pros: string[];
   cons: string[];
   suggestions: string[];
