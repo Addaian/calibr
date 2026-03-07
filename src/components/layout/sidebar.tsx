@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard,
   Blocks,
   Briefcase,
   FileText,
@@ -16,9 +15,8 @@ import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Blocks", href: "/blocks", icon: Blocks },
   { label: "Jobs", href: "/jobs", icon: Briefcase },
+  { label: "Blocks", href: "/blocks", icon: Blocks },
   { label: "Resumes", href: "/resumes", icon: FileText },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
@@ -44,7 +42,7 @@ export function Sidebar() {
   return (
     <aside className="flex h-screen w-64 flex-col border-r bg-sidebar text-sidebar-foreground">
       <div className="flex h-14 items-center px-6">
-        <Link href="/dashboard" className="text-xl font-bold tracking-tight">
+        <Link href="/jobs" className="text-xl font-bold tracking-tight">
           Calibr
         </Link>
       </div>

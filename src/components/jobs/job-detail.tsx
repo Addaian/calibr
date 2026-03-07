@@ -11,6 +11,7 @@ import {
   Mail,
   Calendar,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,7 +30,13 @@ interface JobDetailProps {
 
 export function JobDetail({ job }: JobDetailProps) {
   const [status, setStatus] = useState(job.status);
-  const [statusDate, setStatusDate] = useState(job.status_date);
+  const [statusDate, setStatusDate] = useState(job.status_date ?? null);
+
+  const requiredSkills = job.required_skills ?? [];
+  const preferredSkills = job.preferred_skills ?? [];
+  const keywords = job.keywords ?? [];
+  const responsibilities = job.responsibilities ?? [];
+  const companyInfo = job.company_info ?? {};
 
   return (
     <div className="space-y-6">
@@ -102,14 +109,14 @@ export function JobDetail({ job }: JobDetailProps) {
       <Separator />
 
       <div className="grid gap-6 md:grid-cols-2">
-        {job.required_skills.length > 0 && (
+        {requiredSkills.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Required Skills</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {job.required_skills.map((skill) => (
+                {requiredSkills.map((skill) => (
                   <Badge key={skill} variant="destructive">
                     {skill}
                   </Badge>
@@ -119,14 +126,14 @@ export function JobDetail({ job }: JobDetailProps) {
           </Card>
         )}
 
-        {job.preferred_skills.length > 0 && (
+        {preferredSkills.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Preferred Skills</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {job.preferred_skills.map((skill) => (
+                {preferredSkills.map((skill) => (
                   <Badge key={skill} variant="secondary">
                     {skill}
                   </Badge>
@@ -137,29 +144,25 @@ export function JobDetail({ job }: JobDetailProps) {
         )}
       </div>
 
-      {job.keywords.length > 0 && (
+      {keywords.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Keywords</CardTitle>
           </CardHeader>
           <CardContent>
-            <JobKeywords
-              keywords={job.keywords}
-              required_skills={[]}
-              preferred_skills={[]}
-            />
+            <JobKeywords keywords={keywords} required_skills={[]} preferred_skills={[]} />
           </CardContent>
         </Card>
       )}
 
-      {job.responsibilities.length > 0 && (
+      {responsibilities.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Responsibilities</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="list-disc space-y-1.5 pl-5 text-sm">
-              {job.responsibilities.map((item, index) => (
+              {responsibilities.map((item, index) => (
                 <li key={index}>{item}</li>
               ))}
             </ul>
@@ -167,35 +170,29 @@ export function JobDetail({ job }: JobDetailProps) {
         </Card>
       )}
 
-      {(job.company_info.industry ||
-        job.company_info.size ||
-        job.company_info.about) && (
+      {(companyInfo.industry || companyInfo.size || companyInfo.about) && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Company Information</CardTitle>
           </CardHeader>
           <CardContent>
             <dl className="space-y-3 text-sm">
-              {job.company_info.industry && (
+              {companyInfo.industry && (
                 <div>
-                  <dt className="font-medium text-muted-foreground">
-                    Industry
-                  </dt>
-                  <dd>{job.company_info.industry}</dd>
+                  <dt className="font-medium text-muted-foreground">Industry</dt>
+                  <dd>{companyInfo.industry}</dd>
                 </div>
               )}
-              {job.company_info.size && (
+              {companyInfo.size && (
                 <div>
-                  <dt className="font-medium text-muted-foreground">
-                    Company Size
-                  </dt>
-                  <dd>{job.company_info.size}</dd>
+                  <dt className="font-medium text-muted-foreground">Company Size</dt>
+                  <dd>{companyInfo.size}</dd>
                 </div>
               )}
-              {job.company_info.about && (
+              {companyInfo.about && (
                 <div>
                   <dt className="font-medium text-muted-foreground">About</dt>
-                  <dd>{job.company_info.about}</dd>
+                  <dd>{companyInfo.about}</dd>
                 </div>
               )}
             </dl>
