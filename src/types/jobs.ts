@@ -17,6 +17,7 @@ export interface JobPosting {
     size?: string;
     about?: string;
   };
+  education_requirement: "completed" | "in_progress_ok" | "none" | null;
   status: "active" | "applied" | "interview" | "rejected" | "offer";
   status_date: string | null;
   created_at: string;

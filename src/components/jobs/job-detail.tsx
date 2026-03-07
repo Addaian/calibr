@@ -10,6 +10,7 @@ import {
   FileText,
   Mail,
   Calendar,
+  GraduationCap,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -69,6 +70,14 @@ export function JobDetail({ job }: JobDetailProps) {
               <span className="flex items-center gap-1.5">
                 <Briefcase className="size-4" />
                 {job.employment_type}
+              </span>
+            )}
+            {job.education_requirement && job.education_requirement !== "none" && (
+              <span className="flex items-center gap-1.5">
+                <GraduationCap className="size-4" />
+                {job.education_requirement === "in_progress_ok"
+                  ? "Students welcome"
+                  : "Degree required"}
               </span>
             )}
             {job.salary_range && (

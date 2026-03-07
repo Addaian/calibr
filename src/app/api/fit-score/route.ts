@@ -67,16 +67,30 @@ export async function POST(request: Request) {
       ? skillCategories.map((c) => `- ${c.category}: ${c.items.join(", ")}`).join("\n")
       : undefined;
 
+    // Detect in-progress education: education blocks with no end_date or future end_date
+    const today = new Date();
+    const inProgressEdu = blocksResult.data.filter((b: { type: string; end_date?: string | null }) => {
+      if (b.type !== "education") return false;
+      if (!b.end_date) return true;
+      return new Date(b.end_date) > today;
+    });
+    const candidateContext = inProgressEdu.length > 0
+      ? "Candidate is currently enrolled in a degree program (in progress, not yet graduated)."
+      : undefined;
+
     const blocksText = JSON.stringify(blocksResult.data, null, 2);
     const jobText = JSON.stringify(jobResult.data, null, 2);
-    const prompt = getFitScorePrompt(blocksText, jobText, skillsProfile);
+    const prompt = getFitScorePrompt(blocksText, jobText, skillsProfile, candidateContext);
 
     const claude = getClaudeClient();
     const message = await claude.messages.create({
       model: CLAUDE_MODEL,
       max_tokens: 2048,
       system: prompt.system,
-      messages: [{ role: "user", content: prompt.user }],
+      messages: [
+        { role: "user", content: prompt.user },
+        { role: "assistant", content: "{" },
+      ],
     });
 
     const content = message.content[0];
@@ -87,11 +101,13 @@ export async function POST(request: Request) {
       );
     }
 
+    // Prepend the prefill character we used to start the JSON
+    const rawText = "{" + content.text;
     let rawJson: unknown;
     try {
-      rawJson = JSON.parse(content.text);
+      rawJson = JSON.parse(rawText);
     } catch {
-      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         return NextResponse.json(
           { error: "Failed to parse AI response" },

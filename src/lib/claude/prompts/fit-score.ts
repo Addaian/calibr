@@ -1,7 +1,8 @@
 export function getFitScorePrompt(
   blocks: string,
   jobPosting: string,
-  skillsProfile?: string
+  skillsProfile?: string,
+  candidateContext?: string
 ): { system: string; user: string } {
   return {
     system: `You are a resume-job fit analyst. Evaluate how well a candidate's experience blocks match a job posting.
@@ -19,6 +20,11 @@ Scoring guide:
 - 30-49: Weak fit, significant gaps in key areas
 - 0-29: Poor fit, few relevant qualifications
 
+Education requirement guidance:
+- If the job requires a COMPLETED degree ("education_requirement": "completed") and the candidate is still enrolled, note this as a con but do not penalize more than 10-15 points — many such roles still consider strong candidates.
+- If the job is open to students still enrolled ("education_requirement": "in_progress_ok"), treat in-progress education as a neutral or positive signal.
+- If no education requirement is specified, do not penalize for in-progress education.
+
 Return ONLY valid JSON:
 {
   "score": 75,
@@ -26,6 +32,6 @@ Return ONLY valid JSON:
   "cons": ["specific gap 1", "specific gap 2"],
   "suggestions": ["actionable suggestion 1", "actionable suggestion 2"]
 }`,
-    user: `Candidate's experience blocks:\n\n${blocks}${skillsProfile ? `\n\nCandidate's skills profile:\n\n${skillsProfile}` : ""}\n\nJob posting:\n\n${jobPosting}\n\nAnalyze the fit and return only JSON.`,
+    user: `Candidate's experience blocks:\n\n${blocks}${skillsProfile ? `\n\nCandidate's skills profile:\n\n${skillsProfile}` : ""}${candidateContext ? `\n\nCandidate context:\n${candidateContext}` : ""}\n\nJob posting:\n\n${jobPosting}\n\nAnalyze the fit and return only JSON.`,
   };
 }

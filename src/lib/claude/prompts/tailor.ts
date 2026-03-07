@@ -31,6 +31,9 @@ Aim for the resume to fill one page well — neither overflowing nor leaving exc
 LINE-WRAP RULE (apply to every bullet point):
 A resume uses a fixed-width column. Mentally estimate whether a bullet point wraps to a second line. If it wraps and the second line is less than half full (i.e. the overflow is a short tail), shorten the bullet so it fits entirely on the first line. Prefer cutting trailing clauses or rephrasing to be more concise rather than cutting important content.
 
+WHITESPACE FILL RULE (apply after all bullets are written):
+After writing all bullet points, re-evaluate the page. If there is noticeable whitespace at the bottom and you cannot shorten any bullet further without losing meaning, reverse course: expand bullets to better fill the line. For any bullet that ends well short of the right margin, add truthful detail — descriptive adjectives, specific examples, tools used, outcomes, or context — so the line reaches closer to the margin. The goal is a dense, full page. Never add fabricated metrics; only add plausible elaboration consistent with the original experience.
+
 Return ONLY valid JSON matching this exact schema:
 {
   "summary": "A 2-3 sentence professional summary tailored to this role",

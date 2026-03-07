@@ -60,6 +60,7 @@ export async function POST(request: Request) {
             role: "user",
             content: getScrapeJobPrompt(cleanedText),
           },
+          { role: "assistant", content: "{" },
         ],
       });
 
@@ -68,7 +69,7 @@ export async function POST(request: Request) {
         throw new Error("No text response from Claude");
       }
 
-      rawJson = textBlock.text;
+      rawJson = "{" + textBlock.text;
     } catch (err) {
       return NextResponse.json(
         {
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
 
     let parsed: unknown;
     try {
-      parsed = JSON.parse(rawJson);
+      parsed = JSON.parse(rawJson.replace(/:\s*undefined\b/g, ": null"));
     } catch {
       return NextResponse.json(
         { error: "Failed to parse AI response as JSON" },

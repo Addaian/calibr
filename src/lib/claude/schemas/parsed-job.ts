@@ -17,6 +17,10 @@ export const parsedJobSchema = z.object({
       about: z.string().optional(),
     })
     .default({}),
+  education_requirement: z
+    .enum(["completed", "in_progress_ok", "none"])
+    .nullable()
+    .default(null),
 });
 
 export type ParsedJob = z.infer<typeof parsedJobSchema>;

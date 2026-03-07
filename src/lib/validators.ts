@@ -45,6 +45,10 @@ export const createJobSchema = z.object({
       about: z.string().optional(),
     })
     .default({}),
+  education_requirement: z
+    .enum(["completed", "in_progress_ok", "none"])
+    .nullable()
+    .optional(),
   status: z
     .enum(["active", "applied", "interview", "rejected", "offer"])
     .default("active"),

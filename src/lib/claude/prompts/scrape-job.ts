@@ -15,6 +15,11 @@ Return a JSON object with the following fields:
   - "industry" (string | undefined): The industry the company operates in.
   - "size" (string | undefined): The company size if mentioned.
   - "about" (string | undefined): A brief description of the company.
+- "education_requirement" ("completed" | "in_progress_ok" | "none" | null): Whether the role requires a finished degree or accepts candidates currently enrolled:
+  - "completed": Job explicitly requires a completed/awarded bachelor's degree (e.g. "Bachelor's degree required", "must have a BS/BA").
+  - "in_progress_ok": Job is open to students still pursuing their degree (e.g. internships, "currently enrolled", "pursuing a degree", "expected graduation", "rising junior/senior", new-grad roles that list an expected grad year).
+  - "none": Job posting explicitly states no degree is required.
+  - null: Education requirement is not mentioned or unclear.
 
 Rules:
 - Return ONLY valid JSON, no markdown, no code fences, no extra text.
