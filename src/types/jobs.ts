@@ -34,6 +34,13 @@ export interface JobPosting {
     | "ghosted"
     | "declined";
   status_date: string | null;
+  notes: string | null;
+  source: string | null;
+  recruiter_name: string | null;
+  recruiter_email: string | null;
+  follow_up_date: string | null;
+  priority: 1 | 2 | 3 | null;
+  offer_amount: string | null;
   created_at: string;
   updated_at: string;
 }
