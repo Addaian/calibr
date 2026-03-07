@@ -8,6 +8,7 @@ export interface TailoredBlock {
   end_date: string | null;
   bullet_points: string[];
   technologies: string[];
+  metadata?: Record<string, unknown>;
 }
 
 export interface TailoredContent {

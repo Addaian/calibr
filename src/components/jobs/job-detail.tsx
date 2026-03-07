@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { JobKeywords } from "./job-keywords";
+import { JobDocuments } from "./job-documents";
 import { StatusSwitcher } from "./status-switcher";
 import type { JobPosting } from "@/types/jobs";
 
@@ -199,6 +200,19 @@ export function JobDetail({ job }: JobDetailProps) {
           </CardContent>
         </Card>
       )}
+
+      {job.description_raw && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Job Description</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="whitespace-pre-wrap text-sm text-muted-foreground">{job.description_raw}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      <JobDocuments jobId={job.id} company={job.company} />
     </div>
   );
 }

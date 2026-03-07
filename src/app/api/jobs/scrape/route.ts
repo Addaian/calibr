@@ -103,7 +103,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json(validationResult.data);
+    return NextResponse.json({ ...validationResult.data, description_raw: cleanedText });
   } catch {
     return NextResponse.json(
       { error: "Internal server error" },

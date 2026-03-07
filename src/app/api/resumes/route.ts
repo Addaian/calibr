@@ -11,7 +11,7 @@ const createResumeSchema = z.object({
   job_posting_id: z.string().uuid().optional(),
 });
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const supabase = await createClient();
     const {
@@ -22,11 +22,19 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data, error } = await supabase
+    const jobId = new URL(request.url).searchParams.get("job_id");
+
+    let query = supabase
       .from("generated_resumes")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
+
+    if (jobId) {
+      query = query.eq("job_posting_id", jobId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

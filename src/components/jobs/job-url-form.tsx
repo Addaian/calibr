@@ -23,14 +23,19 @@ export function JobUrlForm({ onSubmit, onPasteSubmit, loading }: JobUrlFormProps
     e.preventDefault();
     setError("");
 
+    let normalized = url.trim();
+    if (normalized && !/^https?:\/\//i.test(normalized)) {
+      normalized = "https://" + normalized;
+    }
+
     try {
-      new URL(url);
+      new URL(normalized);
     } catch {
       setError("Please enter a valid URL");
       return;
     }
 
-    onSubmit(url);
+    onSubmit(normalized);
   }
 
   function handlePasteSubmit(e: React.FormEvent) {
@@ -56,7 +61,7 @@ export function JobUrlForm({ onSubmit, onPasteSubmit, loading }: JobUrlFormProps
                 <LinkIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="job-url"
-                  type="url"
+                  type="text"
                   placeholder="https://example.com/jobs/..."
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}

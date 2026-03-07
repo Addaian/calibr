@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import useSWR from "swr";
-import { Plus, Building2, MapPin, Trash2, ArrowUpDown, Calendar, AlignJustify, List } from "lucide-react";
+import { Plus, Building2, MapPin, Trash2, ArrowUpDown, Calendar, AlignJustify, List, LayoutGrid } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,7 +14,8 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { StatusSwitcher } from "@/components/jobs/status-switcher";
+import { StatusSwitcher, type Status } from "@/components/jobs/status-switcher";
+import { JobKanbanBoard } from "@/components/jobs/job-kanban-board";
 import type { JobPosting } from "@/types/jobs";
 
 const fetcher = (url: string) =>
@@ -70,10 +71,39 @@ function formatStatusDate(d: string | null) {
   });
 }
 
+type ViewMode = "list" | "compact" | "kanban";
+
 export default function JobsPage() {
   const [sortKey, setSortKey] = useState<SortKey>("status_date");
-  const [compact, setCompact] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("calibr:jobs-view") as ViewMode | null;
+    if (saved) setViewMode(saved);
+  }, []);
   const { data, error, isLoading, mutate } = useSWR<JobPosting[]>("/api/jobs", fetcher);
+
+  function handleViewMode(mode: ViewMode) {
+    setViewMode(mode);
+    localStorage.setItem("calibr:jobs-view", mode);
+  }
+
+  function handleStatusChange(jobId: string, newStatus: Status, statusDate: string) {
+    mutate(
+      (jobs) =>
+        jobs?.map((j) =>
+          j.id === jobId ? { ...j, status: newStatus, status_date: statusDate } : j
+        ),
+      false
+    );
+    fetch(`/api/jobs/${jobId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus, status_date: statusDate }),
+    });
+  }
+
+  const compact = viewMode === "compact";
 
   const sorted = useMemo(() => sortJobs(data ?? [], sortKey), [data, sortKey]);
 
@@ -103,42 +133,53 @@ export default function JobsPage() {
       </div>
 
       <div className="flex items-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <ArrowUpDown className="h-3.5 w-3.5" />
-              Sort: {sortLabel}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuRadioGroup value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
-              {SORT_OPTIONS.map((o) => (
-                <DropdownMenuRadioItem key={o.value} value={o.value}>
-                  {o.label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {viewMode !== "kanban" && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <ArrowUpDown className="h-3.5 w-3.5" />
+                Sort: {sortLabel}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuRadioGroup value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+                {SORT_OPTIONS.map((o) => (
+                  <DropdownMenuRadioItem key={o.value} value={o.value}>
+                    {o.label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         <div className="flex items-center rounded-md border p-0.5">
           <Button
-            variant={!compact ? "secondary" : "ghost"}
+            variant={viewMode === "list" ? "secondary" : "ghost"}
             size="icon"
             className="h-7 w-7"
-            onClick={() => setCompact(false)}
-            title="Normal"
+            onClick={() => handleViewMode("list")}
+            title="List"
           >
             <List className="h-3.5 w-3.5" />
           </Button>
           <Button
-            variant={compact ? "secondary" : "ghost"}
+            variant={viewMode === "compact" ? "secondary" : "ghost"}
             size="icon"
             className="h-7 w-7"
-            onClick={() => setCompact(true)}
+            onClick={() => handleViewMode("compact")}
             title="Compact"
           >
             <AlignJustify className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant={viewMode === "kanban" ? "secondary" : "ghost"}
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => handleViewMode("kanban")}
+            title="Kanban"
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
@@ -177,13 +218,17 @@ export default function JobsPage() {
         </div>
       )}
 
-      {sorted.length > 0 && (
+      {viewMode === "kanban" && data && data.length > 0 && (
+        <JobKanbanBoard jobs={data} onStatusChange={handleStatusChange} />
+      )}
+
+      {viewMode !== "kanban" && sorted.length > 0 && (
         <div className="rounded-lg border">
           {/* Header */}
-          <div className={`hidden grid-cols-[160px_1fr_140px_140px_120px_80px] gap-4 border-b bg-muted/50 px-4 text-xs font-medium text-muted-foreground sm:grid ${compact ? "py-1.5" : "py-2"}`}>
+          <div className={`hidden grid-cols-[160px_140px_1fr_140px_120px_80px] gap-4 border-b bg-muted/50 px-4 text-xs font-medium text-muted-foreground sm:grid ${compact ? "py-1.5" : "py-2"}`}>
             <span>Status</span>
-            <span>Role</span>
             <span>Company</span>
+            <span>Role</span>
             <span>Location</span>
             <span>Date</span>
             <span />
@@ -195,7 +240,7 @@ export default function JobsPage() {
               return (
                 <div
                   key={job.id}
-                  className={`grid grid-cols-1 gap-2 px-4 sm:grid-cols-[160px_1fr_140px_140px_120px_80px] sm:items-center sm:gap-4 ${compact ? "py-1.5" : "py-3"}`}
+                  className={`grid grid-cols-1 gap-2 px-4 sm:grid-cols-[160px_140px_1fr_140px_120px_80px] sm:items-center sm:gap-4 ${compact ? "py-1.5" : "py-3"}`}
                 >
                   {/* Status */}
                   <div>
@@ -215,16 +260,6 @@ export default function JobsPage() {
                     />
                   </div>
 
-                  {/* Role */}
-                  <div>
-                    <Link
-                      href={`/jobs/${job.id}`}
-                      className="text-sm font-medium hover:underline"
-                    >
-                      {job.title}
-                    </Link>
-                  </div>
-
                   {/* Company */}
                   <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                     {job.company ? (
@@ -235,6 +270,16 @@ export default function JobsPage() {
                     ) : (
                       <span className="text-xs text-muted-foreground/50">—</span>
                     )}
+                  </div>
+
+                  {/* Role */}
+                  <div>
+                    <Link
+                      href={`/jobs/${job.id}`}
+                      className="text-sm font-medium hover:underline"
+                    >
+                      {job.title}
+                    </Link>
                   </div>
 
                   {/* Location */}

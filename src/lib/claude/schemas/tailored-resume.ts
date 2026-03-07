@@ -10,6 +10,7 @@ export const tailoredBlockSchema = z.object({
   end_date: z.string().nullable(),
   bullet_points: z.array(z.string()),
   technologies: z.array(z.string()),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const tailoredResumeSchema = z.object({

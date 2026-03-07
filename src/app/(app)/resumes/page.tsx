@@ -15,6 +15,14 @@ import type { ResumeProfile } from "@/components/resume/resume-pdf";
 import { ResumeCard } from "@/components/resume/resume-card";
 import { FileText, Mail, Copy, Download, FileDown, Upload, Sparkles } from "lucide-react";
 import { downloadAsPdf, downloadAsDocx } from "@/lib/cover-letter-download";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { JobPosting } from "@/types/jobs";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -37,10 +45,14 @@ function toneLabel(tone: string) {
 
 export default function ResumesPage() {
   const [resumeFilter, setResumeFilter] = useState<ResumeFilter>("all");
+  const [jobFilter, setJobFilter] = useState<string | null>(null);
+  const { data: jobs } = useSWR<JobPosting[]>("/api/jobs", fetcher);
+  const resumesUrl = jobFilter ? `/api/resumes?job_id=${jobFilter}` : "/api/resumes";
+  const clUrl = jobFilter ? `/api/cover-letters?job_id=${jobFilter}` : "/api/cover-letters";
   const { data: resumes, mutate: mutateResumes, isLoading: resumesLoading, error: resumesError } =
-    useSWR<GeneratedResume[]>("/api/resumes", fetcher);
+    useSWR<GeneratedResume[]>(resumesUrl, fetcher);
   const { data: coverLetters, isLoading: clLoading, error: clError } =
-    useSWR<CoverLetterWithJob[]>("/api/cover-letters", fetcher);
+    useSWR<CoverLetterWithJob[]>(clUrl, fetcher);
   const { data: profile } = useSWR<ResumeProfile>("/api/profile", fetcher);
 
   async function handleDeleteResume(id: string) {
@@ -72,7 +84,7 @@ export default function ResumesPage() {
   return (
     <div className="space-y-6 p-6">
       <Tabs defaultValue="resumes">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <TabsList>
             <TabsTrigger value="resumes">
               <FileText className="mr-1.5 h-3.5 w-3.5" />
@@ -83,6 +95,24 @@ export default function ResumesPage() {
               Cover Letters
             </TabsTrigger>
           </TabsList>
+          {Array.isArray(jobs) && jobs.length > 0 && (
+            <Select
+              value={jobFilter ?? "all"}
+              onValueChange={(v) => setJobFilter(v === "all" ? null : v)}
+            >
+              <SelectTrigger className="h-8 w-56 text-sm">
+                <SelectValue placeholder="All jobs" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All jobs</SelectItem>
+                {jobs.map((job) => (
+                  <SelectItem key={job.id} value={job.id}>
+                    {job.title}{job.company ? ` — ${job.company}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         {/* ── Resumes Tab ── */}

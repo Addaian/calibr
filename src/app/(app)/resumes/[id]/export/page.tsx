@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { GeneratedResume } from "@/types/resumes";
 import type { ResumeProfile } from "@/components/resume/resume-pdf";
+import { KeywordMatchPanel } from "@/components/resume/keyword-match-panel";
 import { ArrowLeft } from "lucide-react";
 
 const ResumePreview = dynamic(
@@ -70,6 +71,8 @@ export default function ExportPage() {
         </Link>
         <h1 className="text-2xl font-bold">{resume.name}</h1>
       </div>
+
+      <KeywordMatchPanel jobId={resume.job_posting_id} content={resume.tailored_content} />
 
       <ResumePreview
         content={resume.tailored_content}
