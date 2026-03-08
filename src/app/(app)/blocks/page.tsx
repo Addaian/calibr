@@ -3,7 +3,7 @@
 import Link from "next/link";
 import useSWR from "swr";
 import { toast } from "sonner";
-import { Plus, Upload } from "lucide-react";
+import { Blocks, Plus, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BlockList } from "@/components/blocks/block-list";
@@ -25,10 +25,13 @@ export default function BlocksPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Experience Blocks</h1>
-        <div className="flex gap-2">
+    <div className="mx-auto max-w-5xl space-y-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Experience Blocks</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Your reusable career building blocks — used to tailor every resume.</p>
+        </div>
+        <div className="flex shrink-0 gap-2">
           <Button variant="outline" asChild>
             <Link href="/blocks/import">
               <Upload />
@@ -47,6 +50,22 @@ export default function BlocksPage() {
       {error && (
         <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           Failed to load blocks. Please try refreshing the page.
+        </div>
+      )}
+
+      {!isLoading && !error && Array.isArray(data) && data.length === 0 && (
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed py-20 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+            <Blocks className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <div>
+            <p className="font-medium">No blocks yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">Import your existing resume or add blocks manually.</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild><Link href="/blocks/import"><Upload className="h-4 w-4" />Import Resume</Link></Button>
+            <Button asChild><Link href="/blocks/new"><Plus className="h-4 w-4" />Add Block</Link></Button>
+          </div>
         </div>
       )}
 

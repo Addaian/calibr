@@ -82,7 +82,11 @@ export default function ResumesPage() {
   const allCoverLetters = Array.isArray(coverLetters) ? coverLetters : [];
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="mx-auto max-w-5xl space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Library</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Your generated resumes and cover letters.</p>
+      </div>
       <Tabs defaultValue="resumes">
         <div className="flex items-center justify-between gap-4">
           <TabsList>
@@ -226,6 +230,10 @@ export default function ResumesPage() {
                 return (
                   <Card key={cl.id} className="flex flex-col">
                     <CardHeader className="pb-2">
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Cover Letter</span>
+                      </div>
                       <CardTitle className="truncate text-base">{jobTitle}</CardTitle>
                       {company && (
                         <p className="text-sm text-muted-foreground">{company}</p>
