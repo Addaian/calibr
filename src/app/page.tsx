@@ -123,7 +123,7 @@ export default function LandingPage() {
             <div className="grid gap-8 md:grid-cols-3">
               {steps.map((step) => (
                 <div key={step.number} className="text-center">
-                  <div className="mb-4 text-5xl font-bold text-primary/20">
+                  <div className="mb-4 text-5xl font-bold text-primary/60" aria-hidden="true">
                     {step.number}
                   </div>
                   <h3 className="mb-2 text-lg font-semibold">{step.title}</h3>

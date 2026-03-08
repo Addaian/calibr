@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import useSWR from "swr";
 import {
   Plus, Building2, MapPin, Trash2, Calendar, AlignJustify,
@@ -12,9 +13,17 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { StatusSwitcher, type Status } from "@/components/jobs/status-switcher";
-import { JobKanbanBoard } from "@/components/jobs/job-kanban-board";
-import { JobSankeyView } from "@/components/jobs/job-sankey";
 import { InlineText, InlineDate, InlineSource, InlinePriority } from "@/components/jobs/job-cells";
+
+const JobKanbanBoard = dynamic(() => import("@/components/jobs/job-kanban-board").then(m => ({ default: m.JobKanbanBoard })), {
+  loading: () => <div className="flex items-center justify-center py-20 text-sm text-muted-foreground">Loading board…</div>,
+  ssr: false,
+});
+
+const JobSankeyView = dynamic(() => import("@/components/jobs/job-sankey").then(m => ({ default: m.JobSankeyView })), {
+  loading: () => <div className="flex items-center justify-center py-20 text-sm text-muted-foreground">Loading pipeline…</div>,
+  ssr: false,
+});
 import type { JobPosting } from "@/types/jobs";
 import type { GeneratedResume } from "@/types/resumes";
 
