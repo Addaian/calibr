@@ -35,10 +35,10 @@ function getBestScore(resumes: GeneratedResume[]): number | null {
   return scores.length > 0 ? Math.max(...scores) : null;
 }
 
-function fitScoreBadgeVariant(score: number): "default" | "secondary" | "destructive" | "outline" {
-  if (score >= 70) return "default";
-  if (score >= 50) return "secondary";
-  return "destructive";
+function fitPillClass(score: number) {
+  if (score >= 70) return "bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-400";
+  if (score >= 50) return "bg-amber-500/10 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400";
+  return "bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400";
 }
 
 interface JobDetailProps {
@@ -70,9 +70,9 @@ export function JobDetail({ job }: JobDetailProps) {
               onUpdate={(s, d) => { setStatus(s); setStatusDate(d); }}
             />
             {bestScore !== null && (
-              <Badge variant={fitScoreBadgeVariant(bestScore)} className="text-sm">
+              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium ${fitPillClass(bestScore)}`}>
                 {bestScore}% fit
-              </Badge>
+              </span>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-4 text-muted-foreground">

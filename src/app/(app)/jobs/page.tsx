@@ -406,7 +406,7 @@ export default function JobsPage() {
                       {/* Fit */}
                       <div className="justify-center">
                         {fitScore !== undefined
-                          ? <Badge variant={fitScore >= 70 ? "default" : fitScore >= 50 ? "secondary" : "destructive"} className="text-xs px-1.5 py-0">{fitScore}%</Badge>
+                          ? <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${fitScore >= 70 ? "bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-400" : fitScore >= 50 ? "bg-amber-500/10 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400" : "bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400"}`}>{fitScore}%</span>
                           : <span className="text-xs text-muted-foreground/30">—</span>}
                       </div>
 
