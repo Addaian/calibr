@@ -17,11 +17,11 @@ const typeLabels: Record<BlockType, string> = {
 };
 
 const typeBadgeColors: Record<BlockType, string> = {
-  work_experience: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  project: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-  education: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  volunteering: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
-  research: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300",
+  work_experience: "bg-blue-500/10 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400",
+  project: "bg-violet-500/10 text-violet-700 dark:bg-violet-500/15 dark:text-violet-400",
+  education: "bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-400",
+  volunteering: "bg-pink-500/10 text-pink-700 dark:bg-pink-500/15 dark:text-pink-400",
+  research: "bg-cyan-500/10 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-400",
 };
 
 function formatDateRange(startDate: string | null, endDate: string | null): string | null {
@@ -68,7 +68,7 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
   }
 
   return (
-    <Card className="group relative">
+    <Card className="group relative overflow-hidden">
       <CardHeader className="px-3 pb-0.5 pt-2">
         <div className="flex items-start justify-between gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -104,19 +104,19 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-0.5 px-3 pb-2">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
           {block.organization && (
-            <span className="font-medium">{block.organization}</span>
+            <span className="min-w-0 truncate font-medium">{block.organization}</span>
           )}
           {block.location && (
-            <span className="inline-flex items-center gap-0.5">
-              <MapPin className="size-3" />
-              {block.location}
+            <span className="inline-flex min-w-0 items-center gap-0.5">
+              <MapPin className="size-3 shrink-0" />
+              <span className="truncate">{block.location}</span>
             </span>
           )}
           {dateRange && (
-            <span className="inline-flex items-center gap-0.5">
-              <Calendar className="size-3" />
+            <span className="inline-flex shrink-0 items-center gap-0.5">
+              <Calendar className="size-3 shrink-0" />
               {dateRange}
             </span>
           )}
@@ -124,7 +124,7 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
         {block.bullet_points.length > 0 && (
           <ul className="list-inside list-disc space-y-0 text-xs text-muted-foreground">
             {block.bullet_points.slice(0, 1).map((point, i) => (
-              <li key={i} className="truncate">
+              <li key={i} className="overflow-hidden text-ellipsis whitespace-nowrap">
                 {point}
               </li>
             ))}
