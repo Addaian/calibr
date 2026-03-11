@@ -113,6 +113,20 @@ export const updateInterviewRoundSchema = createInterviewRoundSchema
   .omit({ job_posting_id: true })
   .partial();
 
+export const createContactSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200),
+  email: z.string().email().nullable().optional(),
+  phone: z.string().max(50).nullable().optional(),
+  company: z.string().max(200).nullable().optional(),
+  role: z.string().max(200).nullable().optional(),
+  notes: z.string().nullable().optional(),
+  linkedin_url: z.string().url().nullable().optional(),
+  last_contacted_at: z.string().nullable().optional(),
+  job_posting_id: z.string().uuid().nullable().optional(),
+});
+
+export const updateContactSchema = createContactSchema.partial();
+
 export const coverLetterSchema = z.object({
   job_posting_id: z.string().uuid(),
   generated_resume_id: z.string().uuid().optional(),

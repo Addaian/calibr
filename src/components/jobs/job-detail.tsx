@@ -30,6 +30,7 @@ import { JobDocuments } from "./job-documents";
 import { StatusSwitcher } from "./status-switcher";
 import { InterviewTimeline } from "./interview-timeline";
 import { CompensationForm } from "./compensation-form";
+import { JobContacts } from "@/components/contacts/job-contacts";
 import type { JobPosting, Compensation } from "@/types/jobs";
 import type { GeneratedResume } from "@/types/resumes";
 
@@ -274,6 +275,10 @@ export function JobDetail({ job }: JobDetailProps) {
           initial={compensation}
           onSave={setCompensation}
         />
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Contacts">
+        <JobContacts jobId={job.id} />
       </CollapsibleCard>
 
       <CollapsibleCard title="Interview Rounds">
