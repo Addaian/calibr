@@ -321,9 +321,74 @@ export default function JobsPage() {
         onMutate={() => mutate()}
       />
 
-      {/* List / Compact */}
+      {/* Mobile card list — shown only on small screens */}
       {(viewMode === "list" || viewMode === "compact") && sorted.length > 0 && (
-        <div className="rounded-lg border overflow-hidden">
+        <div className="md:hidden divide-y rounded-lg border">
+          {sorted.map(job => {
+            const fitScore = bestScoreByJob.get(job.id);
+            const today = new Date().toISOString().split("T")[0];
+            const isOverdue = !!job.deadline && job.deadline < today &&
+              (job.status === "active" || job.status === "applying");
+            return (
+              <div key={job.id} className="flex items-start gap-3 p-4">
+                <input
+                  type="checkbox"
+                  checked={selected.has(job.id)}
+                  onChange={() => toggleOne(job.id)}
+                  className="mt-1 h-3.5 w-3.5 shrink-0 cursor-pointer accent-primary"
+                />
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <Link href={`/jobs/${job.id}`} className="font-medium text-sm hover:underline line-clamp-1">
+                        {job.title}
+                      </Link>
+                      {job.company && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                          <Building2 className="h-3 w-3 shrink-0" />{job.company}
+                        </p>
+                      )}
+                    </div>
+                    {fitScore !== undefined && (
+                      <span className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${fitScore >= 70 ? "bg-green-500/10 text-green-700 dark:text-green-400" : fitScore >= 50 ? "bg-amber-500/10 text-amber-700 dark:text-amber-400" : "bg-red-500/10 text-red-600 dark:text-red-400"}`}>
+                        {fitScore}%
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <StatusSwitcher
+                      jobId={job.id}
+                      status={job.status}
+                      statusDate={job.status_date}
+                      onUpdate={(s, d) => mutate(jobs => jobs?.map(j => j.id === job.id ? { ...j, status: s, status_date: d } : j), false)}
+                    />
+                    {job.location && (
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <MapPin className="h-3 w-3" />{job.location}
+                      </span>
+                    )}
+                    {job.deadline && (
+                      <span className={`flex items-center gap-1 text-xs ${isOverdue ? "text-red-600 dark:text-red-400 font-medium" : "text-muted-foreground"}`}>
+                        {isOverdue ? <AlertCircle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                        {fmtDate(job.deadline)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <Button variant="ghost" size="icon-sm" onClick={() => handleDelete(job.id)} className="shrink-0">
+                  <Trash2 className="size-3.5 text-muted-foreground" />
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* List / Compact — desktop table */}
+      {(viewMode === "list" || viewMode === "compact") && sorted.length > 0 && (
+        <div className="hidden md:block rounded-lg border overflow-hidden">
           <div className="overflow-x-auto">
             <div style={{ minWidth: MIN_W }}>
 
