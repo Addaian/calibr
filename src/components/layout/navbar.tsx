@@ -68,7 +68,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b bg-background/80 px-4 backdrop-blur md:px-6">
+      <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border/50 bg-background/70 px-4 backdrop-blur-xl md:px-6">
         {/* Logo */}
         <Link
           href="/dashboard"
@@ -86,14 +86,15 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors ${
+                className={`relative flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold transition-all duration-150 hover:-translate-y-px ${
                   active
-                    ? "bg-primary text-primary-foreground"
+                    ? "text-foreground"
                     : "text-foreground hover:bg-accent"
                 }`}
               >
                 <item.icon className="h-3.5 w-3.5" />
                 {item.label}
+                {active && <span className="absolute -bottom-px left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-primary" />}
               </Link>
             );
           })}
@@ -108,14 +109,15 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                className={`relative flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-150 hover:-translate-y-px ${
                   active
-                    ? "bg-accent text-foreground"
+                    ? "text-foreground"
                     : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                 }`}
               >
                 <item.icon className="h-3.5 w-3.5" />
                 {item.label}
+                {active && <span className="absolute -bottom-px left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-muted-foreground/50" />}
               </Link>
             );
           })}

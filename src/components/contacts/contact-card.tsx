@@ -9,7 +9,11 @@ interface ContactCardProps {
   onClick: () => void;
 }
 
+const BORDER_COLORS = ["border-l-blue-500","border-l-violet-500","border-l-amber-500","border-l-green-500","border-l-rose-500"];
+
 export function ContactCard({ contact, jobTitle, onClick }: ContactCardProps) {
+  const borderColor = BORDER_COLORS[contact.name.charCodeAt(0) % BORDER_COLORS.length];
+
   function fmtDate(d: string | null) {
     if (!d) return null;
     return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
@@ -18,7 +22,7 @@ export function ContactCard({ contact, jobTitle, onClick }: ContactCardProps) {
   return (
     <button
       onClick={onClick}
-      className="w-full rounded-xl border bg-card p-4 text-left hover:bg-accent/40 transition-colors space-y-2"
+      className={`hover-lift w-full rounded-xl border border-l-4 ${borderColor} bg-card p-4 text-left transition-colors space-y-2`}
     >
       <div className="flex items-start justify-between gap-2">
         <div>

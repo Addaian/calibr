@@ -86,8 +86,13 @@ export default function ContactsPage() {
       )}
 
       {!isLoading && filtered.length === 0 && (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed py-16">
-          <Users className="h-8 w-8 text-muted-foreground/50" />
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-muted-foreground/20 bg-muted/10 py-16">
+          <div className="relative flex items-center justify-center">
+            <div className="absolute h-24 w-24 rounded-full bg-primary/5 blur-2xl" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-primary/5">
+              <Users className="h-6 w-6 text-primary/60" />
+            </div>
+          </div>
           <div className="text-center">
             <p className="font-medium">{query ? "No contacts found" : "No contacts yet"}</p>
             <p className="text-sm text-muted-foreground mt-1">
@@ -105,13 +110,18 @@ export default function ContactsPage() {
 
       {filtered.length > 0 && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map(c => (
-            <ContactCard
+          {filtered.map((c, i) => (
+            <div
               key={c.id}
-              contact={c}
-              jobTitle={c.job_posting_id ? jobTitleById.get(c.job_posting_id) : undefined}
-              onClick={() => openEdit(c)}
-            />
+              style={{ animationDelay: `${Math.min(i * 50, 400)}ms` }}
+              className="animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-300"
+            >
+              <ContactCard
+                contact={c}
+                jobTitle={c.job_posting_id ? jobTitleById.get(c.job_posting_id) : undefined}
+                onClick={() => openEdit(c)}
+              />
+            </div>
           ))}
         </div>
       )}

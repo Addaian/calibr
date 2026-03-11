@@ -5,7 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import useSWR from "swr";
 import {
-  Plus, Building2, MapPin, Trash2, Calendar, AlignJustify,
+  Plus, Building2, MapPin, Trash2, Calendar, AlignJustify, Briefcase,
   List, LayoutGrid, GitFork, ArrowUp, ArrowDown, ChevronsUpDown,
   Clock, AlertCircle, FileText, Upload,
 } from "lucide-react";
@@ -294,7 +294,13 @@ export default function JobsPage() {
 
       {/* Empty */}
       {data && data.length === 0 && (
-        <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed py-16">
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-muted-foreground/20 bg-muted/10 py-16">
+          <div className="relative flex items-center justify-center">
+            <div className="absolute h-24 w-24 rounded-full bg-primary/5 blur-2xl" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-primary/5">
+              <Briefcase className="h-6 w-6 text-primary/60" />
+            </div>
+          </div>
           <p className="text-muted-foreground">No job postings yet</p>
           <Button asChild>
             <Link href="/jobs/new">

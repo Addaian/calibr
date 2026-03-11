@@ -87,7 +87,13 @@ export default function ComparePage() {
       </div>
 
       {offers.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed py-16">
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-muted-foreground/20 bg-muted/10 py-16">
+          <div className="relative flex items-center justify-center">
+            <div className="absolute h-24 w-24 rounded-full bg-primary/5 blur-2xl" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-primary/5">
+              <ExternalLink className="h-6 w-6 text-primary/60" />
+            </div>
+          </div>
           <p className="text-sm font-medium">No offers with compensation data yet</p>
           <p className="text-xs text-muted-foreground text-center max-w-xs">
             Set a job status to Offer or Negotiating and fill in the Compensation section to compare.

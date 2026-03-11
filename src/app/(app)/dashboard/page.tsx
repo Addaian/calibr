@@ -89,15 +89,26 @@ function StatCard({
   icon: Icon,
   label,
   value,
+  borderColor,
+  iconBg,
+  iconColor,
+  index,
 }: {
   icon: React.ElementType;
   label: string;
   value: string | number;
+  borderColor: string;
+  iconBg: string;
+  iconColor: string;
+  index: number;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border bg-card p-4">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-        <Icon className="h-4 w-4 text-muted-foreground" />
+    <div
+      className={`hover-lift animate-fade-up flex items-center gap-3 rounded-xl border border-t-2 ${borderColor} bg-card p-4`}
+      style={{ "--stagger": index } as React.CSSProperties}
+    >
+      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconBg}`}>
+        <Icon className={`h-4 w-4 ${iconColor}`} />
       </div>
       <div className="min-w-0">
         <p className="text-2xl font-bold leading-none">{value}</p>
@@ -114,7 +125,7 @@ function ActionCard({ action }: { action: ActionItem }) {
   const Icon = meta.icon;
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 transition-colors hover:bg-muted/30">
+    <div className="hover-lift flex items-center gap-3 rounded-lg border bg-card px-4 py-3">
       <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${meta.bgColor}`}>
         <Icon className={`h-3.5 w-3.5 ${meta.color}`} />
       </div>
@@ -156,7 +167,13 @@ function ActionSection({
       <p className={`text-xs font-semibold uppercase tracking-wider ${color}`}>{label}</p>
       <div className="space-y-1.5">
         {actions.map((a, i) => (
-          <ActionCard key={`${a.job_id}-${a.type}-${i}`} action={a} />
+          <div
+            key={`${a.job_id}-${a.type}-${i}`}
+            style={{ animationDelay: `${Math.min(i * 50, 400)}ms` }}
+            className="animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-300"
+          >
+            <ActionCard action={a} />
+          </div>
         ))}
       </div>
     </div>
@@ -191,13 +208,17 @@ export default function DashboardPage() {
         </div>
       ) : data ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatCard icon={Briefcase} label="Total jobs"       value={data.stats.total_jobs} />
-          <StatCard icon={BarChart2} label="Active pipeline"  value={data.stats.active_applications} />
-          <StatCard icon={Trophy}    label="Offers"           value={data.stats.offers} />
+          <StatCard icon={Briefcase} label="Total jobs"       value={data.stats.total_jobs}
+            borderColor="border-t-blue-500/40" iconBg="bg-blue-500/10" iconColor="text-blue-600 dark:text-blue-400" index={0} />
+          <StatCard icon={BarChart2} label="Active pipeline"  value={data.stats.active_applications}
+            borderColor="border-t-violet-500/40" iconBg="bg-violet-500/10" iconColor="text-violet-600 dark:text-violet-400" index={1} />
+          <StatCard icon={Trophy}    label="Offers"           value={data.stats.offers}
+            borderColor="border-t-amber-500/40" iconBg="bg-amber-500/10" iconColor="text-amber-600 dark:text-amber-400" index={2} />
           <StatCard
             icon={Sparkles}
             label="Avg fit score"
             value={data.stats.avg_fit_score !== null ? `${data.stats.avg_fit_score}%` : "—"}
+            borderColor="border-t-green-500/40" iconBg="bg-green-500/10" iconColor="text-green-600 dark:text-green-400" index={3}
           />
         </div>
       ) : null}
@@ -215,9 +236,12 @@ export default function DashboardPage() {
           ))}
         </div>
       ) : data && data.actions.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed py-14">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-            <Trophy className="h-5 w-5 text-muted-foreground" />
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-muted-foreground/20 bg-muted/10 py-14">
+          <div className="relative flex items-center justify-center">
+            <div className="absolute h-24 w-24 rounded-full bg-primary/5 blur-2xl" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-primary/5">
+              <Trophy className="h-6 w-6 text-primary/60" />
+            </div>
           </div>
           <p className="text-sm font-medium">You&apos;re all caught up!</p>
           <p className="text-xs text-muted-foreground">

@@ -135,7 +135,7 @@ export function FitScoreDisplay({ score, analysis }: FitScoreDisplayProps) {
 
       {/* Qualitative grid */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="hover-lift border-l-4 border-l-green-500/40">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400">
               <ThumbsUp className="h-4 w-4" />
@@ -153,7 +153,7 @@ export function FitScoreDisplay({ score, analysis }: FitScoreDisplayProps) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover-lift border-l-4 border-l-red-500/40">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-red-600 dark:text-red-400">
               <ThumbsDown className="h-4 w-4" />
@@ -171,7 +171,7 @@ export function FitScoreDisplay({ score, analysis }: FitScoreDisplayProps) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover-lift border-l-4 border-l-blue-500/40">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400">
               <Lightbulb className="h-4 w-4" />
