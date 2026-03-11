@@ -1,17 +1,31 @@
 # Calibr
 
-Calibr is an AI-powered resume tailoring and job tracking web app. You build a library of your experience as reusable blocks, track your job applications in a structured pipeline, and let Claude rewrite and rank your blocks to match each role — generating a tailored resume and cover letter in seconds.
+Calibr is an AI-powered resume tailoring and job tracking web app built for CS students recruiting at big tech. You build a library of your experience as reusable blocks, track every application in a structured pipeline, and let Claude rewrite and score your blocks to match each role — generating a tailored resume and cover letter in seconds.
 
-## What it does
+## Features
 
-- **Experience Blocks** — Break your resume into modular blocks by type: work experience, projects, education, research, and volunteering. Each block stores bullet points, technologies, dates, and role-specific fields (e.g. professor and institution for research).
-- **Import from Resume** — Upload a PDF resume and Claude automatically parses it into blocks, which you can review and save selectively.
-- **Job Pipeline Tracker** — Track every application in an Excel-style table with 14 pipeline statuses (Tracking → Application → Interviews → Offer Stage → Closed). Inline-edit notes, source, recruiter contact, follow-up date, priority stars, salary, and offer amount. View the same data as a Kanban board or a Sankey pipeline diagram. Sortable by any column.
-- **Job Postings** — Add jobs by pasting a URL (auto-scraped) or pasting the description directly. Claude extracts the title, company, skills, keywords, and responsibilities into structured data.
-- **Tailor Resume** — Select blocks and a job, and Claude rewrites your bullet points to naturally match the job's keywords, reorders blocks by relevance, and writes a tailored professional summary. Optionally upload an existing resume PDF so Claude mirrors your writing style.
-- **Fit Score** — After tailoring, Claude scores the resume against the job (0–100) with pros, cons, and suggestions.
-- **Cover Letter** — Generate a cover letter for any job in professional, conversational, or enthusiastic tone, grounded in your experience blocks.
-- **Export** — Export tailored resumes to PDF or DOCX directly from the app.
+### Job Pipeline
+- **Job Tracker** — Inline-editable table with 14 pipeline statuses across 5 stages (Tracking → Application → Interviews → Offer Stage → Closed). Edit notes, source, recruiter, follow-up date, deadline, priority, and salary inline. Sortable by any column.
+- **Views** — Switch between List, Compact, Kanban (drag-and-drop via @dnd-kit), and Sankey pipeline diagram (d3-sankey).
+- **Job Ingestion** — Add jobs by pasting a URL (auto-scraped with Cheerio; Workday SPA support via their CXS JSON API) or pasting the description directly. Claude extracts title, company, skills, keywords, responsibilities, and deadline into structured data.
+- **Deadline Tracking** — Deadline column with overdue warnings (red) on the tracker and job detail page.
+- **Offer Comparison** — Side-by-side table comparing base salary, signing bonus, RSUs, relocation, Year 1 total, and annual steady-state compensation across all offers.
+- **Bulk Operations** — Multi-select jobs with checkboxes, bulk set status, bulk delete. Import jobs from CSV with column alias mapping and a preview step.
+- **Interview Rounds** — Track each round (phone screen, technical, behavioral, etc.) with outcome, scheduled time, duration, interviewer, and notes. Displayed as a vertical timeline on the job detail page.
+- **Structured Compensation** — Enter base, signing bonus, RSUs, vest period, and relocation per job. Live Year 1 and steady-state calculations update as you type.
+
+### Resume & AI
+- **Experience Blocks** — Modular resume entries by type: work experience, projects, education, research, and volunteering. Each block stores bullet points, technologies, dates, and metadata.
+- **Import from Resume** — Upload a PDF and Claude parses it into blocks for selective saving.
+- **Tailor Resume** — Select blocks and a job; Claude rewrites bullet points to match keywords, reorders by relevance, and writes a tailored summary. Optionally upload a PDF style template so Claude mirrors your formatting and writing style.
+- **Multi-Dimensional Fit Score** — 5-dimension score (0–100): Skills Match (30, algorithmic), Experience Relevance (30, Claude), Education Fit (15, algorithmic), Keyword Coverage (15, algorithmic), Overall Impression (10, Claude). Displayed as a ring gauge with per-dimension progress bars, source badges (ATS/AI), and qualitative strengths/gaps/suggestions.
+- **ATS Keyword Warnings** — Before exporting, see exactly which required keywords are missing from the resume with one-click copy chips.
+- **Cover Letter** — Generate in professional, conversational, or enthusiastic tone, grounded in your blocks and the tailored resume.
+- **Export** — Export tailored resumes to PDF or DOCX.
+
+### Contacts & Templates
+- **Contacts** — Track recruiters, hiring managers, and connections. Link contacts to specific jobs. Searchable grid with name, company, role, email, phone, LinkedIn, and last-contacted date.
+- **Message Templates** — Save reusable email templates for cold outreach, follow-ups, thank-yous, referral requests, negotiation, and withdrawal. Variable substitution (`{{company}}`, `{{recruiter_name}}`, `{{role}}`, etc.). 6 built-in starter templates included. One-click copy to clipboard.
 
 ## Tech stack
 
@@ -22,7 +36,7 @@ Calibr is an AI-powered resume tailoring and job tracking web app. You build a l
 | Styling | Tailwind CSS v4 |
 | UI Components | shadcn/ui + Radix UI |
 | AI | Claude (claude-sonnet-4-6) via Anthropic SDK |
-| Database | Supabase (PostgreSQL) |
+| Database | Supabase (PostgreSQL + RLS) |
 | Auth | Supabase Auth |
 | Drag & drop | @dnd-kit |
 | Pipeline diagram | d3-sankey |
@@ -32,67 +46,49 @@ Calibr is an AI-powered resume tailoring and job tracking web app. You build a l
 | Validation | Zod |
 | Data fetching | SWR |
 
-## How it's implemented
+## Architecture
 
-### Architecture
+The app is a Next.js App Router project. `src/app/(app)` contains all authenticated pages; `src/app/api` contains all API route handlers — there is no separate backend.
 
-The app is a Next.js App Router project with a `src/app/(app)` route group for authenticated pages and `src/app/api` for all backend logic. There is no separate backend — all API routes run as Next.js Route Handlers.
+Auth is handled by Supabase Auth with SSR cookies via `@supabase/ssr`. Middleware (`src/middleware.ts`) protects all `(app)` routes.
 
-Authentication is handled by Supabase Auth with SSR cookies via `@supabase/ssr`. Middleware (`src/middleware.ts`) protects all `(app)` routes and redirects unauthenticated users to `/login`.
+### Database tables
 
-### Database
+All tables have Row Level Security — users can only access their own rows.
 
-Tables in Supabase PostgreSQL, all with Row Level Security (RLS) so users can only access their own data:
+| Table | Purpose |
+|---|---|
+| `user_profiles` | Auto-created on signup; stores skills profile |
+| `experience_blocks` | Modular resume entries |
+| `job_postings` | Structured job data with pipeline status, compensation, recruiter info |
+| `interview_rounds` | Per-round interview tracking linked to a job |
+| `generated_resumes` | Claude-tailored resumes with fit score and analysis |
+| `cover_letters` | Generated cover letters linked to a job and resume |
+| `contacts` | Recruiter and networking contacts, optionally linked to a job |
+| `message_templates` | User-saved email templates with variable placeholders |
 
-- **`user_profiles`** — created automatically on signup via a Postgres trigger; stores skills profile
-- **`experience_blocks`** — modular resume entries with type, bullet points, technologies, and metadata
-- **`job_postings`** — structured job data extracted by Claude from URLs or pasted text; includes pipeline status, recruiter info, salary, offer amount, notes, priority, and follow-up date
-- **`generated_resumes`** — tailored resumes produced by Claude, with a `source` field distinguishing `uploaded` (from PDF import) vs `generated` (by AI); stores fit score and analysis
-- **`cover_letters`** — cover letter text linked to a job and optionally a generated resume
-
-Migrations are in `supabase/migrations/` and must be run in order.
+Migrations are in `supabase/migrations/` and must be run in numeric order.
 
 ### AI integration
 
-All Claude calls go through `src/lib/claude/client.ts` which wraps the Anthropic SDK. Each feature has a dedicated prompt file in `src/lib/claude/prompts/` and a Zod output schema in `src/lib/claude/schemas/`.
+All Claude calls go through `src/lib/claude/client.ts`. Each feature has a prompt in `src/lib/claude/prompts/` and a Zod output schema in `src/lib/claude/schemas/`.
 
-| Feature | Prompt | Output schema |
+| Feature | Prompt | Schema |
 |---|---|---|
-| Parse resume PDF into blocks | `parse-resume.ts` | `parsed-resume.ts` |
+| Parse resume PDF | `parse-resume.ts` | `parsed-resume.ts` |
 | Scrape/parse job posting | `scrape-job.ts` | `parsed-job.ts` |
 | Tailor blocks for a job | `tailor.ts` | `tailored-resume.ts` |
-| Score fit against a job | `fit-score.ts` | `fit-score.ts` |
+| Fit score (AI dimensions) | `fit-score.ts` | `fit-score.ts` |
 | Generate cover letter | `cover-letter.ts` | free text |
 
-Claude is instructed to return JSON only. API routes try `JSON.parse()` on the raw response first, then fall back to regex extraction (`/\{[\s\S]*\}/`) if Claude wraps the output in prose. Output is validated with `.safeParse()` and a 422 is returned if the schema doesn't match.
+Claude is instructed to return JSON only. Routes try `JSON.parse()` first, then fall back to regex extraction, and validate output with Zod `.safeParse()`.
 
-### Job pipeline tracker
+### Fit score pipeline
 
-The job tracker is an inline-editable CSS Grid table (`src/app/(app)/jobs/page.tsx`) with 14 columns. Key design details:
-
-- **Status system** — 14 statuses grouped into 5 stages: Tracking (`active`, `applying`), Application (`applied`, `screening`), Interviews (`interview`, `assessment`, `final_round`), Offer Stage (`offer`, `negotiating`, `accepted`), Closed (`rejected`, `withdrawn`, `ghosted`, `declined`).
-- **Inline editing** — `src/components/jobs/job-cells.tsx` provides `InlineText`, `InlineDate`, `InlineSource`, and `InlinePriority` components that switch to inputs on click and save on blur/Enter via `PUT /api/jobs/[id]`.
-- **Sorting** — clicking any column header sorts ascending/descending; date and priority columns default to descending on first click.
-- **Hover expansion** — truncated cell values expand in place on hover via Tailwind `group/cell` + `group-hover/cell:whitespace-normal`.
-- **Views** — List, Compact (same table, less row padding), Kanban (5 grouped columns with drag-and-drop via @dnd-kit), Pipeline (Sankey flow diagram via d3-sankey with hover highlighting and tooltips).
-
-### Job ingestion
-
-Jobs can be added two ways:
-- **URL mode** — `POST /api/jobs/scrape` fetches the page with `cheerio`, strips HTML, and sends the cleaned text to Claude
-- **Paste mode** — `POST /api/jobs/parse` sends the pasted text directly to Claude, skipping scraping
-
-### Resume tailoring flow
-
-1. User selects blocks and a job on `/jobs/[id]/tailor`
-2. Optionally uploads a PDF style template — `POST /api/resume-template` extracts its text with pdf-parse
-3. `POST /api/tailor` sends blocks + job + optional style template text to Claude
-4. Claude returns a structured JSON object with a summary and rewritten blocks
-5. Result is saved to `generated_resumes` and the user is shown a preview with fit score
-
-### Security
-
-Every API route authenticates via `supabase.auth.getUser()` and all database queries filter by `user_id` so data is strictly scoped per user. RLS policies on all tables provide a second layer of enforcement at the database level.
+Scoring is a three-phase pipeline in `POST /api/fit-score`:
+1. **Algorithmic** — Skills Match, Keyword Coverage, and Education Fit are computed deterministically in `src/lib/fit-score-calc.ts` using word-boundary regex matching against a corpus built from all block text and the user's skills profile.
+2. **Claude** — Experience Relevance and Overall Impression are scored by Claude, which also returns pros, cons, and suggestions.
+3. **Assembly** — All 5 dimension scores are summed into a total and the full `FitAnalysis` object is persisted to `generated_resumes.fit_analysis`.
 
 ## Getting started
 
@@ -104,13 +100,13 @@ Every API route authenticates via `supabase.auth.getUser()` and all database que
 
 ### Setup
 
-1. Clone the repo and install dependencies:
+1. Clone and install:
 
 ```bash
 npm install
 ```
 
-2. Create `.env.local` in the project root:
+2. Create `.env.local`:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
@@ -118,12 +114,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 ANTHROPIC_API_KEY=your_anthropic_api_key
 ```
 
-3. Run the database migrations by pasting each file from `supabase/migrations/` into the Supabase SQL Editor and running them in numeric order.
+3. Run migrations in the Supabase SQL Editor in numeric order from `supabase/migrations/`.
 
-4. Start the development server:
+4. Start the dev server:
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and sign up for an account.
+Open [http://localhost:3000](http://localhost:3000) and sign up.
