@@ -7,14 +7,15 @@ import useSWR from "swr";
 import {
   Plus, Building2, MapPin, Trash2, Calendar, AlignJustify,
   List, LayoutGrid, GitFork, ArrowUp, ArrowDown, ChevronsUpDown,
-  Clock, AlertCircle, FileText,
+  Clock, AlertCircle, FileText, Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { StatusSwitcher, type Status } from "@/components/jobs/status-switcher";
 import { InlineText, InlineDate, InlineSource, InlinePriority } from "@/components/jobs/job-cells";
+import { CsvImportDialog } from "@/components/jobs/csv-import-dialog";
+import { BulkActionsBar } from "@/components/jobs/bulk-actions-bar";
 
 const JobKanbanBoard = dynamic(() => import("@/components/jobs/job-kanban-board").then(m => ({ default: m.JobKanbanBoard })), {
   loading: () => <div className="flex items-center justify-center py-20 text-sm text-muted-foreground">Loading board…</div>,
@@ -109,10 +110,10 @@ function fmtDate(d: string | null) {
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
-// Shared grid columns — 14 columns
-// Priority | Status | Company | Role | Location | Source | Recruiter | Applied | Follow-up | Deadline | Salary | Fit | Notes | Actions
-const GRID = "grid-cols-[80px_140px_110px_160px_110px_140px_110px_92px_92px_92px_100px_50px_170px_72px]";
-const MIN_W = 1523;
+// Shared grid columns — 15 columns
+// Checkbox | Priority | Status | Company | Role | Location | Source | Recruiter | Applied | Follow-up | Deadline | Salary | Fit | Notes | Actions
+const GRID = "grid-cols-[32px_80px_140px_110px_160px_110px_140px_110px_92px_92px_92px_100px_50px_120px_72px]";
+const MIN_W = 1505;
 
 // Row base classes — divide-x gives Excel-style column lines, [&>*] applies per-cell padding
 // items-start so text stays at top when a cell expands on hover
@@ -124,6 +125,8 @@ type ViewMode = "list" | "compact" | "kanban" | "sankey";
 export default function JobsPage() {
   const [sort, setSort] = useState<SortState>({ key: "status_date", dir: "desc" });
   const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [importOpen, setImportOpen] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("calibr:jobs-view") as ViewMode | null;
@@ -201,18 +204,47 @@ export default function JobsPage() {
   const compact = viewMode === "compact";
   const sorted = useMemo(() => sortJobs(data ?? [], sort, bestScoreByJob), [data, sort, bestScoreByJob]);
 
+  const allIds = useMemo(() => sorted.map(j => j.id), [sorted]);
+  const allSelected = allIds.length > 0 && allIds.every(id => selected.has(id));
+  const someSelected = allIds.some(id => selected.has(id));
+
+  function toggleAll() {
+    if (allSelected) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(allIds));
+    }
+  }
+
+  function toggleOne(id: string) {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Job Postings</h1>
-        <Button asChild>
-          <Link href="/jobs/new">
-            <Plus className="size-4" />
-            Add Job
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
+            <Upload className="size-4" />
+            Import CSV
+          </Button>
+          <Button asChild>
+            <Link href="/jobs/new">
+              <Plus className="size-4" />
+              Add Job
+            </Link>
+          </Button>
+        </div>
       </div>
+
+      <CsvImportDialog open={importOpen} onOpenChange={setImportOpen} onImported={() => mutate()} />
 
       {/* View toggles */}
       <div className="flex items-center gap-2">
@@ -283,6 +315,12 @@ export default function JobsPage() {
         <JobSankeyView jobs={data} />
       )}
 
+      <BulkActionsBar
+        selectedIds={Array.from(selected)}
+        onClear={() => setSelected(new Set())}
+        onMutate={() => mutate()}
+      />
+
       {/* List / Compact */}
       {(viewMode === "list" || viewMode === "compact") && sorted.length > 0 && (
         <div className="rounded-lg border overflow-hidden">
@@ -291,6 +329,17 @@ export default function JobsPage() {
 
               {/* Header row */}
               <div className={`grid ${GRID} ${ROW_CELLS} border-b bg-muted/50 divide-x divide-border/40 ${compact ? "[&>*]:py-1.5" : "[&>*]:py-2"}`}>
+                {/* Select-all checkbox */}
+                <div className="flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={el => { if (el) el.indeterminate = someSelected && !allSelected; }}
+                    onChange={toggleAll}
+                    className="h-3.5 w-3.5 cursor-pointer accent-primary"
+                    aria-label="Select all"
+                  />
+                </div>
                 <ColHeader label="Priority"  col="priority"       sort={sort} onSort={handleSort} />
                 <ColHeader label="Status"    col="status"         sort={sort} onSort={handleSort} />
                 <ColHeader label="Company"   col="company"        sort={sort} onSort={handleSort} />
@@ -314,8 +363,19 @@ export default function JobsPage() {
                   return (
                     <div
                       key={job.id}
-                      className={`grid ${GRID} ${ROW_CELLS} divide-x divide-border/20 ${compact ? "[&>*]:py-1" : "[&>*]:py-2.5"}`}
+                      className={`grid ${GRID} ${ROW_CELLS} divide-x divide-border/20 ${compact ? "[&>*]:py-1" : "[&>*]:py-2.5"} ${selected.has(job.id) ? "bg-accent/40" : ""}`}
                     >
+                      {/* Checkbox */}
+                      <div className="flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={selected.has(job.id)}
+                          onChange={() => toggleOne(job.id)}
+                          className="h-3.5 w-3.5 cursor-pointer accent-primary"
+                          aria-label={`Select ${job.title}`}
+                        />
+                      </div>
+
                       {/* Priority */}
                       <div>
                         <InlinePriority
