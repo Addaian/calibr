@@ -14,6 +14,7 @@ import {
   GraduationCap,
   Clock,
   AlertCircle,
+  ChevronDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,39 @@ function fitPillClass(score: number) {
   if (score >= 50) return "bg-amber-500/10 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400";
   return "bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400";
 }
+
+// ─── Collapsible Card ─────────────────────────────────────────────────────────
+
+function CollapsibleCard({
+  title,
+  defaultOpen = true,
+  children,
+}: {
+  title: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <Card>
+      <CardHeader
+        className="cursor-pointer select-none py-3"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base">{title}</CardTitle>
+          <ChevronDown
+            className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          />
+        </div>
+      </CardHeader>
+      {open && <CardContent>{children}</CardContent>}
+    </Card>
+  );
+}
+
+// ─── Job Detail ───────────────────────────────────────────────────────────────
 
 interface JobDetailProps {
   job: JobPosting;
@@ -165,117 +199,80 @@ export function JobDetail({ job }: JobDetailProps) {
 
       <div className="grid gap-6 md:grid-cols-2">
         {requiredSkills.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Required Skills</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {requiredSkills.map((skill) => (
-                  <Badge key={skill} variant="destructive">
-                    {skill}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <CollapsibleCard title="Required Skills">
+            <div className="flex flex-wrap gap-2">
+              {requiredSkills.map((skill) => (
+                <Badge key={skill} variant="destructive">{skill}</Badge>
+              ))}
+            </div>
+          </CollapsibleCard>
         )}
 
         {preferredSkills.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Preferred Skills</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {preferredSkills.map((skill) => (
-                  <Badge key={skill} variant="secondary">
-                    {skill}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <CollapsibleCard title="Preferred Skills">
+            <div className="flex flex-wrap gap-2">
+              {preferredSkills.map((skill) => (
+                <Badge key={skill} variant="secondary">{skill}</Badge>
+              ))}
+            </div>
+          </CollapsibleCard>
         )}
       </div>
 
       {keywords.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Keywords</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <JobKeywords keywords={keywords} required_skills={[]} preferred_skills={[]} />
-          </CardContent>
-        </Card>
+        <CollapsibleCard title="Keywords">
+          <JobKeywords keywords={keywords} required_skills={[]} preferred_skills={[]} />
+        </CollapsibleCard>
       )}
 
       {responsibilities.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Responsibilities</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="list-disc space-y-1.5 pl-5 text-sm">
-              {responsibilities.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+        <CollapsibleCard title="Responsibilities">
+          <ul className="list-disc space-y-1.5 pl-5 text-sm">
+            {responsibilities.map((item, index) => (
+              <li key={index}>{item}</li>
+            ))}
+          </ul>
+        </CollapsibleCard>
       )}
 
       {(companyInfo.industry || companyInfo.size || companyInfo.about) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Company Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <dl className="space-y-3 text-sm">
-              {companyInfo.industry && (
-                <div>
-                  <dt className="font-medium text-muted-foreground">Industry</dt>
-                  <dd>{companyInfo.industry}</dd>
-                </div>
-              )}
-              {companyInfo.size && (
-                <div>
-                  <dt className="font-medium text-muted-foreground">Company Size</dt>
-                  <dd>{companyInfo.size}</dd>
-                </div>
-              )}
-              {companyInfo.about && (
-                <div>
-                  <dt className="font-medium text-muted-foreground">About</dt>
-                  <dd>{companyInfo.about}</dd>
-                </div>
-              )}
-            </dl>
-          </CardContent>
-        </Card>
+        <CollapsibleCard title="Company Information">
+          <dl className="space-y-3 text-sm">
+            {companyInfo.industry && (
+              <div>
+                <dt className="font-medium text-muted-foreground">Industry</dt>
+                <dd>{companyInfo.industry}</dd>
+              </div>
+            )}
+            {companyInfo.size && (
+              <div>
+                <dt className="font-medium text-muted-foreground">Company Size</dt>
+                <dd>{companyInfo.size}</dd>
+              </div>
+            )}
+            {companyInfo.about && (
+              <div>
+                <dt className="font-medium text-muted-foreground">About</dt>
+                <dd>{companyInfo.about}</dd>
+              </div>
+            )}
+          </dl>
+        </CollapsibleCard>
       )}
 
       {job.description_raw && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Job Description</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="whitespace-pre-wrap text-sm text-muted-foreground">{job.description_raw}</p>
-          </CardContent>
-        </Card>
+        <CollapsibleCard title="Job Description" defaultOpen={false}>
+          <p className="whitespace-pre-wrap text-sm text-muted-foreground">{job.description_raw}</p>
+        </CollapsibleCard>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Interview Rounds</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <InterviewTimeline jobId={job.id} />
-        </CardContent>
-      </Card>
+      <CollapsibleCard title="Interview Rounds">
+        <InterviewTimeline jobId={job.id} />
+      </CollapsibleCard>
 
-      <JobDocuments jobId={job.id} company={job.company} />
+      <CollapsibleCard title="Documents">
+        <JobDocuments jobId={job.id} company={job.company} />
+      </CollapsibleCard>
     </div>
   );
 }
