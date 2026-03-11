@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BlockSelector } from "@/components/tailor/block-selector";
 import { TailoringPreview } from "@/components/tailor/tailoring-preview";
 import { FitScoreDisplay } from "@/components/tailor/fit-score-display";
+import { KeywordMatchPanel } from "@/components/resume/keyword-match-panel";
 import type { ExperienceBlock } from "@/types/blocks";
 import type { JobPosting } from "@/types/jobs";
 import type { GeneratedResume, FitAnalysis } from "@/types/resumes";
@@ -255,6 +256,8 @@ export default function TailorPage() {
 
       {step === 1 && resume && (
         <div className="space-y-6">
+          <KeywordMatchPanel jobId={jobId} content={resume.tailored_content} />
+
           <TailoringPreview content={resume.tailored_content} />
 
           {scoringLoading && (
