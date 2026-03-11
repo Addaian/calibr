@@ -83,6 +83,25 @@ export const fitScoreSchema = z.object({
   resume_id: z.string().uuid().optional(),
 });
 
+export const createInterviewRoundSchema = z.object({
+  job_posting_id: z.string().uuid(),
+  round_number: z.number().int().min(1).default(1),
+  round_type: z.enum([
+    "online_assessment", "phone_screen", "technical", "behavioral",
+    "system_design", "team_match", "hiring_manager", "other",
+  ]),
+  scheduled_at: z.string().nullable().optional(),
+  duration_minutes: z.number().int().min(1).max(600).nullable().optional(),
+  location: z.string().max(200).nullable().optional(),
+  interviewer_name: z.string().max(200).nullable().optional(),
+  notes: z.string().nullable().optional(),
+  outcome: z.enum(["pending", "passed", "failed", "cancelled"]).default("pending"),
+});
+
+export const updateInterviewRoundSchema = createInterviewRoundSchema
+  .omit({ job_posting_id: true })
+  .partial();
+
 export const coverLetterSchema = z.object({
   job_posting_id: z.string().uuid(),
   generated_resume_id: z.string().uuid().optional(),

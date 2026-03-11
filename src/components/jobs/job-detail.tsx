@@ -27,6 +27,7 @@ import { Separator } from "@/components/ui/separator";
 import { JobKeywords } from "./job-keywords";
 import { JobDocuments } from "./job-documents";
 import { StatusSwitcher } from "./status-switcher";
+import { InterviewTimeline } from "./interview-timeline";
 import type { JobPosting } from "@/types/jobs";
 import type { GeneratedResume } from "@/types/resumes";
 
@@ -264,6 +265,15 @@ export function JobDetail({ job }: JobDetailProps) {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Interview Rounds</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <InterviewTimeline jobId={job.id} />
+        </CardContent>
+      </Card>
 
       <JobDocuments jobId={job.id} company={job.company} />
     </div>
