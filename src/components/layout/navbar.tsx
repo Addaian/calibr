@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Blocks, Briefcase, FileText, Settings, LogOut, User, Trophy, Users } from "lucide-react";
+import { Blocks, Briefcase, FileText, Settings, LogOut, User, Trophy, Users, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
@@ -11,6 +11,7 @@ const navItems = [
   { label: "Jobs", href: "/jobs", icon: Briefcase },
   { label: "Compare", href: "/jobs/compare", icon: Trophy },
   { label: "Contacts", href: "/contacts", icon: Users },
+  { label: "Templates", href: "/templates", icon: Mail },
   { label: "Blocks", href: "/blocks", icon: Blocks },
   { label: "Resumes", href: "/resumes", icon: FileText },
   { label: "Personal Info", href: "/personal-info", icon: User },

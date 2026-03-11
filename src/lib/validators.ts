@@ -113,6 +113,15 @@ export const updateInterviewRoundSchema = createInterviewRoundSchema
   .omit({ job_posting_id: true })
   .partial();
 
+export const createTemplateSchema = z.object({
+  name: z.string().min(1).max(200),
+  category: z.enum(["cold_outreach", "follow_up", "thank_you", "referral_request", "negotiation", "withdrawal", "other"]),
+  subject: z.string().max(300).nullable().optional(),
+  body: z.string().min(1),
+});
+
+export const updateTemplateSchema = createTemplateSchema.partial();
+
 export const createContactSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),
   email: z.string().email().nullable().optional(),
