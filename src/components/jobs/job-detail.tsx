@@ -12,6 +12,8 @@ import {
   Mail,
   Calendar,
   GraduationCap,
+  Clock,
+  AlertCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -119,6 +121,26 @@ export function JobDetail({ job }: JobDetailProps) {
                 })}
               </span>
             )}
+            {job.deadline && (() => {
+              const today = new Date().toISOString().split("T")[0];
+              const isOverdue = job.deadline < today &&
+                (job.status === "active" || job.status === "applying");
+              return (
+                <span className={`flex items-center gap-1.5 ${isOverdue ? "text-red-600 dark:text-red-400 font-medium" : ""}`}>
+                  {isOverdue
+                    ? <AlertCircle className="size-4" />
+                    : <Clock className="size-4" />}
+                  Deadline:{" "}
+                  {new Date(job.deadline).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                    timeZone: "UTC",
+                  })}
+                  {isOverdue && " (overdue)"}
+                </span>
+              );
+            })()}
           </div>
         </div>
 

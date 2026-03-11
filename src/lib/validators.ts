@@ -61,6 +61,7 @@ export const createJobSchema = z.object({
   source: z.string().max(100).nullable().optional(),
   recruiter_name: z.string().max(200).nullable().optional(),
   recruiter_email: z.string().nullable().optional(),
+  deadline: z.string().nullable().optional(),
   follow_up_date: z.string().nullable().optional(),
   priority: z.union([z.literal(1), z.literal(2), z.literal(3)]).nullable().optional(),
   offer_amount: z.string().max(100).nullable().optional(),

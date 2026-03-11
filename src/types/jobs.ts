@@ -38,6 +38,7 @@ export interface JobPosting {
   source: string | null;
   recruiter_name: string | null;
   recruiter_email: string | null;
+  deadline: string | null;
   follow_up_date: string | null;
   priority: 1 | 2 | 3 | null;
   offer_amount: string | null;

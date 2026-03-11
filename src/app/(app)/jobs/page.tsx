@@ -7,6 +7,7 @@ import useSWR from "swr";
 import {
   Plus, Building2, MapPin, Trash2, Calendar, AlignJustify,
   List, LayoutGrid, GitFork, ArrowUp, ArrowDown, ChevronsUpDown,
+  Clock, AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -29,14 +30,14 @@ import type { GeneratedResume } from "@/types/resumes";
 
 // ─── Sorting ──────────────────────────────────────────────────────────────────
 type SortKey =
-  | "priority" | "status" | "status_date" | "follow_up_date"
+  | "priority" | "status" | "status_date" | "follow_up_date" | "deadline"
   | "company" | "title" | "location" | "source"
   | "recruiter_name" | "salary_range" | "offer_amount" | "fit";
 type SortDir = "asc" | "desc";
 interface SortState { key: SortKey; dir: SortDir; }
 
 // Columns that default to descending when first clicked
-const DESC_FIRST: SortKey[] = ["status_date", "follow_up_date", "priority", "fit"];
+const DESC_FIRST: SortKey[] = ["status_date", "follow_up_date", "deadline", "priority", "fit"];
 
 const STATUS_ORDER: Record<string, number> = {
   active: 0, applying: 1, applied: 2, screening: 3, interview: 4,
@@ -59,7 +60,7 @@ function sortJobs(jobs: JobPosting[], sort: SortState, bestScoreByJob: Map<strin
       cmp = a.priority - b.priority;
     } else if (sort.key === "status") {
       cmp = (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99);
-    } else if (sort.key === "status_date" || sort.key === "follow_up_date") {
+    } else if (sort.key === "status_date" || sort.key === "follow_up_date" || sort.key === "deadline") {
       const da = a[sort.key] ?? "";
       const db = b[sort.key] ?? "";
       if (!da && !db) return 0;
@@ -108,10 +109,10 @@ function fmtDate(d: string | null) {
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
-// Shared grid columns — 14 columns
-// Priority | Status | Company | Role | Location | Source | Recruiter | Applied | Follow-up | Salary | Offer | Fit | Notes | Actions
-const GRID = "grid-cols-[80px_140px_110px_160px_110px_140px_110px_92px_92px_100px_82px_50px_170px_72px]";
-const MIN_W = 1520;
+// Shared grid columns — 15 columns
+// Priority | Status | Company | Role | Location | Source | Recruiter | Applied | Follow-up | Deadline | Salary | Offer | Fit | Notes | Actions
+const GRID = "grid-cols-[80px_140px_110px_160px_110px_140px_110px_92px_92px_92px_100px_82px_50px_170px_72px]";
+const MIN_W = 1605;
 
 // Row base classes — divide-x gives Excel-style column lines, [&>*] applies per-cell padding
 // items-start so text stays at top when a cell expands on hover
@@ -291,6 +292,7 @@ export default function JobsPage() {
                 <ColHeader label="Recruiter" col="recruiter_name" sort={sort} onSort={handleSort} />
                 <ColHeader label="Applied"   col="status_date"    sort={sort} onSort={handleSort} />
                 <ColHeader label="Follow-up" col="follow_up_date" sort={sort} onSort={handleSort} />
+                <ColHeader label="Deadline"  col="deadline"       sort={sort} onSort={handleSort} />
                 <ColHeader label="Salary"    col="salary_range"   sort={sort} onSort={handleSort} />
                 <ColHeader label="Offer"     col="offer_amount"   sort={sort} onSort={handleSort} />
                 <div className="flex justify-center w-full"><ColHeader label="Fit" col="fit" sort={sort} onSort={handleSort} /></div>
@@ -382,6 +384,29 @@ export default function JobsPage() {
                           onSave={v => handleFieldUpdate(job.id, { follow_up_date: v })}
                         />
                       </div>
+
+                      {/* Deadline */}
+                      {(() => {
+                        const today = new Date().toISOString().split("T")[0];
+                        const isOverdue = !!job.deadline &&
+                          job.deadline < today &&
+                          (job.status === "active" || job.status === "applying");
+                        return (
+                          <div className="flex items-center gap-1 min-w-0">
+                            {job.deadline && (
+                              isOverdue
+                                ? <AlertCircle className="h-3 w-3 shrink-0 text-red-500" />
+                                : <Clock className="h-3 w-3 shrink-0 text-muted-foreground" />
+                            )}
+                            <InlineDate
+                              value={job.deadline}
+                              placeholder="—"
+                              onSave={v => handleFieldUpdate(job.id, { deadline: v })}
+                              className={isOverdue ? "!text-red-600 dark:!text-red-400 font-medium" : ""}
+                            />
+                          </div>
+                        );
+                      })()}
 
                       {/* Salary */}
                       <div className="group/cell">

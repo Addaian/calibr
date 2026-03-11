@@ -20,6 +20,7 @@ Return a JSON object with the following fields:
   - "in_progress_ok": Job is open to students still pursuing their degree (e.g. internships, "currently enrolled", "pursuing a degree", "expected graduation", "rising junior/senior", new-grad roles that list an expected grad year).
   - "none": Job posting explicitly states no degree is required.
   - null: Education requirement is not mentioned or unclear.
+- "deadline" (string | null): The application deadline or closing date as an ISO 8601 date string (YYYY-MM-DD), or null if not mentioned. Look for phrases like "apply by", "application deadline", "closes on", "last day to apply".
 
 Rules:
 - Return ONLY valid JSON, no markdown, no code fences, no extra text.

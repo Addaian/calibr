@@ -22,6 +22,7 @@ export const parsedJobSchema = z.object({
     .enum(["completed", "in_progress_ok", "none"])
     .nullable()
     .default(null),
+  deadline: z.string().nullable().optional(),
 });
 
 export type ParsedJob = z.infer<typeof parsedJobSchema>;
