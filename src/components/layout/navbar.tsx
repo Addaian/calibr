@@ -72,7 +72,7 @@ export function Navbar() {
         {/* Logo */}
         <Link
           href="/dashboard"
-          className="text-xl font-bold tracking-tight hover:opacity-80 transition-opacity shrink-0"
+          className="text-xl font-bold tracking-tight hover:opacity-80 hover:scale-105 active:scale-95 transition-all duration-150 shrink-0 origin-left"
         >
           Calibr<span className="text-primary">.</span>
         </Link>

@@ -199,11 +199,11 @@ export function StatusSwitcher({ jobId, status, statusDate, onUpdate }: StatusSw
           setDate(statusDate ?? new Date().toISOString().split("T")[0]);
           setOpen(true);
         }}
-        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium transition-opacity hover:opacity-75 ${current.pill}`}
+        className={`group inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium transition-all duration-150 hover:opacity-75 hover:scale-105 active:scale-95 ${current.pill}`}
       >
         <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${current.dot}`} />
         {current.label}
-        <ChevronDown className="h-2.5 w-2.5 opacity-50" />
+        <ChevronDown className="h-2.5 w-2.5 opacity-50 transition-transform duration-200 group-hover:translate-y-px" />
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -228,12 +228,12 @@ export function StatusSwitcher({ jobId, status, statusDate, onUpdate }: StatusSw
                           key={s.value}
                           type="button"
                           onClick={() => setSelected(s.value)}
-                          className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                          className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.97] ${
                             selected === s.value ? s.btnSelected : s.btn
                           }`}
                         >
                           {s.label}
-                          {selected === s.value && <Check className="h-3.5 w-3.5 shrink-0" />}
+                          {selected === s.value && <Check className="h-3.5 w-3.5 shrink-0 animate-check-pop" />}
                         </button>
                       );
                     })}
