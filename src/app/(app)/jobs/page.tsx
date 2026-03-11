@@ -7,7 +7,7 @@ import useSWR from "swr";
 import {
   Plus, Building2, MapPin, Trash2, Calendar, AlignJustify,
   List, LayoutGrid, GitFork, ArrowUp, ArrowDown, ChevronsUpDown,
-  Clock, AlertCircle,
+  Clock, AlertCircle, FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ import type { GeneratedResume } from "@/types/resumes";
 type SortKey =
   | "priority" | "status" | "status_date" | "follow_up_date" | "deadline"
   | "company" | "title" | "location" | "source"
-  | "recruiter_name" | "salary_range" | "offer_amount" | "fit";
+  | "recruiter_name" | "salary_range" | "fit";
 type SortDir = "asc" | "desc";
 interface SortState { key: SortKey; dir: SortDir; }
 
@@ -109,10 +109,10 @@ function fmtDate(d: string | null) {
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
-// Shared grid columns — 15 columns
-// Priority | Status | Company | Role | Location | Source | Recruiter | Applied | Follow-up | Deadline | Salary | Offer | Fit | Notes | Actions
-const GRID = "grid-cols-[80px_140px_110px_160px_110px_140px_110px_92px_92px_92px_100px_82px_50px_170px_72px]";
-const MIN_W = 1605;
+// Shared grid columns — 14 columns
+// Priority | Status | Company | Role | Location | Source | Recruiter | Applied | Follow-up | Deadline | Salary | Fit | Notes | Actions
+const GRID = "grid-cols-[80px_140px_110px_160px_110px_140px_110px_92px_92px_92px_100px_50px_170px_72px]";
+const MIN_W = 1523;
 
 // Row base classes — divide-x gives Excel-style column lines, [&>*] applies per-cell padding
 // items-start so text stays at top when a cell expands on hover
@@ -142,6 +142,14 @@ export default function JobsPage() {
       }
     }
     return map;
+  }, [resumes]);
+
+  const jobsWithResume = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of resumes ?? []) {
+      if (r.job_posting_id) set.add(r.job_posting_id);
+    }
+    return set;
   }, [resumes]);
 
   function handleViewMode(mode: ViewMode) {
@@ -294,7 +302,6 @@ export default function JobsPage() {
                 <ColHeader label="Follow-up" col="follow_up_date" sort={sort} onSort={handleSort} />
                 <ColHeader label="Deadline"  col="deadline"       sort={sort} onSort={handleSort} />
                 <ColHeader label="Salary"    col="salary_range"   sort={sort} onSort={handleSort} />
-                <ColHeader label="Offer"     col="offer_amount"   sort={sort} onSort={handleSort} />
                 <div className="flex justify-center w-full"><ColHeader label="Fit" col="fit" sort={sort} onSort={handleSort} /></div>
                 <span className="text-xs font-medium text-muted-foreground">Notes</span>
                 <span />
@@ -418,21 +425,13 @@ export default function JobsPage() {
                         />
                       </div>
 
-                      {/* Offer */}
-                      <div className="group/cell">
-                        <InlineText
-                          value={job.offer_amount}
-                          placeholder="—"
-                          onSave={v => handleFieldUpdate(job.id, { offer_amount: v })}
-                          className="group-hover/cell:whitespace-normal group-hover/cell:overflow-visible"
-                        />
-                      </div>
-
-                      {/* Fit */}
+                      {/* Fit / Resume indicator */}
                       <div className="justify-center">
                         {fitScore !== undefined
                           ? <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${fitScore >= 70 ? "bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-400" : fitScore >= 50 ? "bg-amber-500/10 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400" : "bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400"}`}>{fitScore}%</span>
-                          : <span className="text-xs text-muted-foreground/30">—</span>}
+                          : jobsWithResume.has(job.id)
+                            ? <span title="Resume exists (not yet scored)"><FileText className="h-3.5 w-3.5 text-muted-foreground" /></span>
+                            : <span className="text-xs text-muted-foreground/30">—</span>}
                       </div>
 
                       {/* Notes */}

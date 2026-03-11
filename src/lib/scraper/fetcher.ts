@@ -1,6 +1,6 @@
 export async function fetchPage(url: string): Promise<string> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000);
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
 
   try {
     const response = await fetch(url, {
@@ -8,10 +8,15 @@ export async function fetchPage(url: string): Promise<string> {
       redirect: "follow",
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (compatible; Calibr/1.0; +https://calibr.app)",
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Cache-Control": "no-cache",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
       },
     });
 
@@ -22,7 +27,11 @@ export async function fetchPage(url: string): Promise<string> {
     }
 
     const contentType = response.headers.get("content-type") || "";
-    if (!contentType.includes("text/html") && !contentType.includes("text/plain") && !contentType.includes("application/xhtml+xml")) {
+    if (
+      !contentType.includes("text/html") &&
+      !contentType.includes("text/plain") &&
+      !contentType.includes("application/xhtml+xml")
+    ) {
       throw new Error(
         `Unexpected content type: ${contentType}. Expected an HTML page.`
       );
@@ -31,7 +40,7 @@ export async function fetchPage(url: string): Promise<string> {
     return await response.text();
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
-      throw new Error(`Request timed out after 10 seconds for URL: ${url}`);
+      throw new Error(`Request timed out after 15 seconds for URL: ${url}`);
     }
     if (error instanceof TypeError) {
       throw new Error(`Network error while fetching ${url}: ${error.message}`);
