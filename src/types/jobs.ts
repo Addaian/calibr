@@ -1,3 +1,13 @@
+export interface Compensation {
+  base?: number;
+  signing_bonus?: number;
+  rsus?: number;
+  rsu_vest_years?: number;
+  relocation?: number;
+  other?: string;
+  currency?: string;
+}
+
 export interface JobPosting {
   id: string;
   user_id: string;
@@ -42,6 +52,7 @@ export interface JobPosting {
   follow_up_date: string | null;
   priority: 1 | 2 | 3 | null;
   offer_amount: string | null;
+  compensation: Compensation | null;
   created_at: string;
   updated_at: string;
 }

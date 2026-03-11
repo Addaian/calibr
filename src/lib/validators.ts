@@ -26,6 +26,16 @@ export const createBlockSchema = z.object({
 
 export const updateBlockSchema = createBlockSchema.partial();
 
+export const compensationSchema = z.object({
+  base: z.number().positive().optional(),
+  signing_bonus: z.number().nonnegative().optional(),
+  rsus: z.number().nonnegative().optional(),
+  rsu_vest_years: z.number().int().min(1).max(10).optional(),
+  relocation: z.number().nonnegative().optional(),
+  other: z.string().max(200).optional(),
+  currency: z.string().max(10).default("USD"),
+});
+
 export const createJobSchema = z.object({
   url: z.string().url().nullable().optional(),
   title: z.string().min(1, "Job title is required").max(200),
@@ -65,6 +75,7 @@ export const createJobSchema = z.object({
   follow_up_date: z.string().nullable().optional(),
   priority: z.union([z.literal(1), z.literal(2), z.literal(3)]).nullable().optional(),
   offer_amount: z.string().max(100).nullable().optional(),
+  compensation: compensationSchema.nullable().optional(),
 });
 
 export const scrapeJobSchema = z.object({

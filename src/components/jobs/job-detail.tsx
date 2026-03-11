@@ -29,7 +29,8 @@ import { JobKeywords } from "./job-keywords";
 import { JobDocuments } from "./job-documents";
 import { StatusSwitcher } from "./status-switcher";
 import { InterviewTimeline } from "./interview-timeline";
-import type { JobPosting } from "@/types/jobs";
+import { CompensationForm } from "./compensation-form";
+import type { JobPosting, Compensation } from "@/types/jobs";
 import type { GeneratedResume } from "@/types/resumes";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -85,6 +86,7 @@ interface JobDetailProps {
 export function JobDetail({ job }: JobDetailProps) {
   const [status, setStatus] = useState(job.status);
   const [statusDate, setStatusDate] = useState(job.status_date ?? null);
+  const [compensation, setCompensation] = useState<Compensation | null>(job.compensation ?? null);
   const { data: resumes } = useSWR<GeneratedResume[]>(`/api/resumes?job_id=${job.id}`, fetcher);
   const bestScore = resumes ? getBestScore(resumes) : null;
 
@@ -265,6 +267,14 @@ export function JobDetail({ job }: JobDetailProps) {
           <p className="whitespace-pre-wrap text-sm text-muted-foreground">{job.description_raw}</p>
         </CollapsibleCard>
       )}
+
+      <CollapsibleCard title="Compensation" defaultOpen={!!compensation}>
+        <CompensationForm
+          jobId={job.id}
+          initial={compensation}
+          onSave={setCompensation}
+        />
+      </CollapsibleCard>
 
       <CollapsibleCard title="Interview Rounds">
         <InterviewTimeline jobId={job.id} />
