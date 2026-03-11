@@ -10,16 +10,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
-const navItems = [
-  { label: "Jobs",          href: "/jobs",          icon: Briefcase },
+const primaryNav = [
+  { label: "Jobs",   href: "/jobs",   icon: Briefcase },
+  { label: "Blocks", href: "/blocks", icon: Blocks },
+];
+
+const secondaryNav = [
   { label: "Compare",       href: "/jobs/compare",  icon: Trophy },
   { label: "Contacts",      href: "/contacts",      icon: Users },
   { label: "Templates",     href: "/templates",     icon: Mail },
-  { label: "Blocks",        href: "/blocks",        icon: Blocks },
   { label: "Resumes",       href: "/resumes",       icon: FileText },
   { label: "Personal Info", href: "/personal-info", icon: User },
   { label: "Settings",      href: "/settings",      icon: Settings },
 ];
+
+const allNav = [...primaryNav, ...secondaryNav];
 
 export function Navbar() {
   const pathname = usePathname();
@@ -39,14 +44,18 @@ export function Navbar() {
     }
   }
 
-  function NavLink({ item }: { item: typeof navItems[number] }) {
-    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+  function isActive(href: string) {
+    return pathname === href || pathname.startsWith(href + "/");
+  }
+
+  function MobileNavLink({ item }: { item: typeof allNav[number] }) {
+    const active = isActive(item.href);
     return (
       <Link
         href={item.href}
         onClick={() => setMenuOpen(false)}
         className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-          isActive
+          active
             ? "bg-accent text-foreground"
             : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
         }`}
@@ -63,21 +72,44 @@ export function Navbar() {
         {/* Logo */}
         <Link
           href="/dashboard"
-          className="text-xl font-bold tracking-tight hover:opacity-80 transition-opacity"
+          className="text-xl font-bold tracking-tight hover:opacity-80 transition-opacity shrink-0"
         >
           Calibr<span className="text-primary">.</span>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-0.5">
-          {navItems.map(item => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+        <nav className="hidden md:flex items-center gap-1 ml-6">
+          {/* Primary — Jobs & Blocks */}
+          {primaryNav.map(item => {
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors ${
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-accent"
+                }`}
+              >
+                <item.icon className="h-3.5 w-3.5" />
+                {item.label}
+              </Link>
+            );
+          })}
+
+          {/* Divider */}
+          <div className="mx-1 h-4 w-px bg-border" />
+
+          {/* Secondary */}
+          {secondaryNav.map(item => {
+            const active = isActive(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  isActive
+                  active
                     ? "bg-accent text-foreground"
                     : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                 }`}
@@ -89,7 +121,7 @@ export function Navbar() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-auto">
           {/* Desktop sign out */}
           <Button
             variant="ghost"
@@ -123,7 +155,10 @@ export function Navbar() {
             onClick={e => e.stopPropagation()}
           >
             <div className="flex flex-col p-3 gap-0.5">
-              {navItems.map(item => <NavLink key={item.href} item={item} />)}
+              <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Main</p>
+              {primaryNav.map(item => <MobileNavLink key={item.href} item={item} />)}
+              <p className="px-3 pt-3 pb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">More</p>
+              {secondaryNav.map(item => <MobileNavLink key={item.href} item={item} />)}
               <div className="my-1 border-t" />
               <button
                 onClick={() => { setMenuOpen(false); handleSignOut(); }}
