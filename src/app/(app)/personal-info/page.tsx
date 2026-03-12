@@ -63,7 +63,7 @@ function TagChipInput({
       {items.map((item, i) => (
         <span
           key={i}
-          className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium"
+          className="flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-xs font-medium"
         >
           {item}
           <button
@@ -188,7 +188,7 @@ export default function PersonalInfoPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
         {/* Personal Information */}
-        <Card>
+        <Card className="border-t-2 border-t-primary/30">
           <CardHeader>
             <CardTitle>Profile</CardTitle>
             <CardDescription>
@@ -288,7 +288,7 @@ export default function PersonalInfoPage() {
         </Card>
 
         {/* Skills & Interests */}
-        <Card>
+        <Card className="border-t-2 border-t-primary/30">
           <CardHeader>
             <CardTitle>Skills &amp; Interests</CardTitle>
             <CardDescription>

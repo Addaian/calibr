@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
+import { Check, Star, Zap } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -67,7 +68,7 @@ export default function SettingsPage() {
 
       <div className="max-w-2xl space-y-6">
         {/* Appearance */}
-        <Card>
+        <Card className="border-t-2 border-t-primary/30">
           <CardHeader>
             <CardTitle>Appearance</CardTitle>
             <CardDescription>
@@ -127,6 +128,51 @@ export default function SettingsPage() {
                   />
                 ))}
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Live preview */}
+        <Card className="overflow-hidden">
+          <div className="h-1.5 bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
+          <CardHeader>
+            <CardTitle>Preview</CardTitle>
+            <CardDescription>
+              See how your accent color looks across common UI elements.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm">
+                <Zap className="mr-1.5 h-3.5 w-3.5" />
+                Primary button
+              </Button>
+              <Button size="sm" variant="outline">Outline button</Button>
+              <Button size="sm" variant="ghost">Ghost button</Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                <Star className="h-3 w-3" /> Badge
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                <Check className="h-3 w-3" /> Active
+              </span>
+              <span className="inline-flex items-center rounded-full bg-primary px-2.5 py-0.5 text-xs font-medium text-primary-foreground">
+                92% fit
+              </span>
+            </div>
+            <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10">
+                <Zap className="h-3.5 w-3.5 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">Sample action item</p>
+                <p className="text-xs text-muted-foreground">This is how cards look with your accent</p>
+              </div>
+              <span className="text-xs font-medium text-primary">View →</span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-primary/10">
+              <div className="h-full w-3/4 rounded-full bg-primary transition-all" />
             </div>
           </CardContent>
         </Card>

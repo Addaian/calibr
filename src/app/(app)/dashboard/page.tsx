@@ -205,6 +205,7 @@ export default function DashboardPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Here&apos;s what needs your attention today.
         </p>
+        <div className="mt-3 h-0.5 w-12 rounded-full bg-primary/40" />
       </div>
 
       {/* Stats */}

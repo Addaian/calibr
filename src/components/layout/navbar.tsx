@@ -92,7 +92,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border/50 bg-background/70 px-4 backdrop-blur-xl md:px-6">
+      <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border/50 bg-background/70 px-4 backdrop-blur-xl md:px-6 after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-primary/25 after:to-transparent">
         {/* Logo */}
         <Link
           href="/dashboard"
@@ -120,7 +120,7 @@ export function Navbar() {
                     <item.icon className="h-3.5 w-3.5" />
                     {item.label}
                     <NavBadge count={navCounts[item.href] ?? 0} />
-                    {active && <span className="absolute -bottom-px left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-primary" />}
+                    {active && <span className="absolute -bottom-px left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-primary shadow-[0_0_8px_oklch(0.55_0.22_275/0.4)]" />}
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -149,7 +149,7 @@ export function Navbar() {
                 <item.icon className="h-3.5 w-3.5" />
                 {item.label}
                 <NavBadge count={navCounts[item.href] ?? 0} />
-                {active && <span className="absolute -bottom-px left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-primary/70" />}
+                {active && <span className="absolute -bottom-px left-1/2 -translate-x-1/2 h-0.5 w-5 rounded-full bg-primary/70" />}
               </Link>
             );
           })}
