@@ -24,9 +24,27 @@ export default function BlocksPage() {
     }
   }
 
+  async function handleReorder(reordered: ExperienceBlock[]) {
+    // Optimistic update
+    mutate(reordered, false);
+
+    const order = reordered.map((b, i) => ({ id: b.id, sort_order: i }));
+    try {
+      const res = await fetch("/api/blocks/reorder", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      toast.error("Failed to save order");
+      mutate(); // revert
+    }
+  }
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4 animate-header-in">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Experience Blocks</h1>
           <p className="mt-1 text-sm text-muted-foreground">Your reusable career building blocks — used to tailor every resume.</p>
@@ -54,9 +72,12 @@ export default function BlocksPage() {
       )}
 
       {!isLoading && !error && Array.isArray(data) && data.length === 0 && (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed py-20 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-            <Blocks className="h-6 w-6 text-muted-foreground" />
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-muted-foreground/20 bg-muted/10 py-20 text-center">
+          <div className="relative flex items-center justify-center">
+            <div className="absolute h-24 w-24 rounded-full bg-primary/5 blur-2xl" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-primary/5">
+              <Blocks className="h-6 w-6 text-primary/60" />
+            </div>
           </div>
           <div>
             <p className="font-medium">No blocks yet</p>
@@ -82,7 +103,11 @@ export default function BlocksPage() {
           ))}
         </div>
       ) : (
-        <BlockList blocks={Array.isArray(data) ? data : []} onDelete={handleDelete} />
+        <BlockList
+          blocks={Array.isArray(data) ? data : []}
+          onDelete={handleDelete}
+          onReorder={handleReorder}
+        />
       )}
     </div>
   );

@@ -1,9 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { FitAnalysis, FitScoreDimension } from "@/types/resumes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { AnimatedNumber } from "@/components/ui/animated-number";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { cn } from "@/lib/utils";
 import {
   ThumbsUp,
@@ -80,7 +83,14 @@ function DimensionRow({ dim }: { dim: FitScoreDimension }) {
 
 export function FitScoreDisplay({ score, analysis }: FitScoreDisplayProps) {
   const circumference = 2 * Math.PI * 45;
-  const offset = circumference - (score / 100) * circumference;
+  const targetOffset = circumference - (score / 100) * circumference;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Delay to ensure CSS transition triggers from full offset → target
+    const timer = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(timer);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -106,14 +116,12 @@ export function FitScoreDisplay({ score, analysis }: FitScoreDisplayProps) {
                   strokeWidth="8"
                   strokeLinecap="round"
                   strokeDasharray={circumference}
-                  strokeDashoffset={offset}
-                  className={cn("transition-all duration-1000", getScoreRingColor(score))}
+                  strokeDashoffset={mounted ? targetOffset : circumference}
+                  className={cn("transition-all duration-1000 ease-out", getScoreRingColor(score))}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className={cn("text-3xl font-bold", getScoreColor(score))}>
-                  {score}
-                </span>
+                <AnimatedNumber value={score} duration={1000} className={cn("text-3xl font-bold", getScoreColor(score))} />
                 <span className="text-xs text-muted-foreground">/100</span>
               </div>
             </div>
@@ -135,7 +143,7 @@ export function FitScoreDisplay({ score, analysis }: FitScoreDisplayProps) {
 
       {/* Qualitative grid */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="hover-lift border-l-4 border-l-green-500/40">
+        <ScrollReveal><Card className="hover-lift border-l-4 border-l-green-500/40">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400">
               <ThumbsUp className="h-4 w-4" />
@@ -151,9 +159,9 @@ export function FitScoreDisplay({ score, analysis }: FitScoreDisplayProps) {
               ))}
             </ul>
           </CardContent>
-        </Card>
+        </Card></ScrollReveal>
 
-        <Card className="hover-lift border-l-4 border-l-red-500/40">
+        <ScrollReveal delay={100}><Card className="hover-lift border-l-4 border-l-red-500/40">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-red-600 dark:text-red-400">
               <ThumbsDown className="h-4 w-4" />
@@ -169,9 +177,9 @@ export function FitScoreDisplay({ score, analysis }: FitScoreDisplayProps) {
               ))}
             </ul>
           </CardContent>
-        </Card>
+        </Card></ScrollReveal>
 
-        <Card className="hover-lift border-l-4 border-l-blue-500/40">
+        <ScrollReveal delay={200}><Card className="hover-lift border-l-4 border-l-blue-500/40">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400">
               <Lightbulb className="h-4 w-4" />
@@ -187,7 +195,7 @@ export function FitScoreDisplay({ score, analysis }: FitScoreDisplayProps) {
               ))}
             </ul>
           </CardContent>
-        </Card>
+        </Card></ScrollReveal>
       </div>
     </div>
   );

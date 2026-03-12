@@ -12,7 +12,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ConfettiBurst } from "@/components/ui/confetti";
 import type { JobPosting } from "@/types/jobs";
+
+const CELEBRATION_STATUSES: Status[] = ["offer", "accepted"];
 
 export type Status = JobPosting["status"];
 
@@ -164,6 +167,7 @@ export function StatusSwitcher({ jobId, status, statusDate, onUpdate }: StatusSw
     statusDate ?? new Date().toISOString().split("T")[0]
   );
   const [saving, setSaving] = useState(false);
+  const [celebrate, setCelebrate] = useState(false);
 
   const current = getStatusMeta(status);
 
@@ -183,7 +187,14 @@ export function StatusSwitcher({ jobId, status, statusDate, onUpdate }: StatusSw
       }
       onUpdate?.(selected, date || null);
       setOpen(false);
-      toast.success("Status updated");
+
+      if (CELEBRATION_STATUSES.includes(selected) && !CELEBRATION_STATUSES.includes(status)) {
+        setCelebrate(true);
+        toast.success(selected === "offer" ? "Congrats on the offer!" : "Congrats — accepted!");
+        setTimeout(() => setCelebrate(false), 2000);
+      } else {
+        toast.success("Status updated");
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update status");
     } finally {
@@ -193,6 +204,7 @@ export function StatusSwitcher({ jobId, status, statusDate, onUpdate }: StatusSw
 
   return (
     <>
+      <ConfettiBurst trigger={celebrate} />
       <button
         onClick={() => {
           setSelected(status);

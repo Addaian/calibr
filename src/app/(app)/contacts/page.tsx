@@ -58,7 +58,7 @@ export default function ContactsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-header-in">
         <h1 className="text-2xl font-bold">Contacts</h1>
         <Button onClick={openAdd}>
           <Plus className="size-4" />

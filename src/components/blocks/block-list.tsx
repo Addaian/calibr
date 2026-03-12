@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
-import { Inbox, LayoutGrid, List, Pencil, Trash2, Calendar, MapPin } from "lucide-react";
+import { Inbox, LayoutGrid, List, Pencil, Trash2, Calendar, MapPin, GripVertical } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,20 +43,62 @@ function formatDateRange(startDate: string | null, endDate: string | null) {
 interface BlockListProps {
   blocks: ExperienceBlock[];
   onDelete?: (id: string) => void;
+  onReorder?: (reordered: ExperienceBlock[]) => void;
 }
 
-export function BlockList({ blocks, onDelete }: BlockListProps) {
+export function BlockList({ blocks, onDelete, onReorder }: BlockListProps) {
   const [activeTab, setActiveTab] = useState("all");
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const dragItemRef = useRef<string | null>(null);
 
   const filteredBlocks =
     activeTab === "all"
       ? blocks
       : blocks.filter((block) => block.type === activeTab);
 
+  const handleDragStart = useCallback((id: string) => {
+    dragItemRef.current = id;
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragItemRef.current !== id) {
+      setDragOverId(id);
+    }
+  }, []);
+
+  const handleDrop = useCallback((targetId: string) => {
+    const sourceId = dragItemRef.current;
+    if (!sourceId || sourceId === targetId || !onReorder) return;
+
+    const sourceIdx = blocks.findIndex(b => b.id === sourceId);
+    const targetIdx = blocks.findIndex(b => b.id === targetId);
+    if (sourceIdx === -1 || targetIdx === -1) return;
+
+    const reordered = [...blocks];
+    const [moved] = reordered.splice(sourceIdx, 1);
+    reordered.splice(targetIdx, 0, moved);
+
+    onReorder(reordered);
+    dragItemRef.current = null;
+    setDragOverId(null);
+  }, [blocks, onReorder]);
+
+  const handleDragEnd = useCallback(() => {
+    dragItemRef.current = null;
+    setDragOverId(null);
+  }, []);
+
   const empty = (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
-      <Inbox className="mb-3 size-10 text-muted-foreground" />
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-muted-foreground/20 bg-muted/10 py-16 text-center">
+      <div className="relative flex items-center justify-center mb-3">
+        <div className="absolute h-24 w-24 rounded-full bg-primary/5 blur-2xl" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-primary/5">
+          <Inbox className="h-6 w-6 text-primary/60" />
+        </div>
+      </div>
       <p className="text-sm font-medium text-muted-foreground">No blocks found</p>
       <p className="text-xs text-muted-foreground">
         {activeTab === "all"
@@ -102,7 +144,26 @@ export function BlockList({ blocks, onDelete }: BlockListProps) {
           {filteredBlocks.length === 0 ? empty : view === "grid" ? (
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
               {filteredBlocks.map((block) => (
-                <BlockCard key={block.id} block={block} onDelete={onDelete} />
+                <div
+                  key={block.id}
+                  draggable={!!onReorder && activeTab === "all"}
+                  onDragStart={() => handleDragStart(block.id)}
+                  onDragOver={(e) => handleDragOver(e, block.id)}
+                  onDrop={() => handleDrop(block.id)}
+                  onDragEnd={handleDragEnd}
+                  className={`relative transition-all duration-150 ${
+                    dragOverId === block.id
+                      ? "scale-[1.02] ring-2 ring-primary/30 rounded-xl"
+                      : ""
+                  } ${onReorder && activeTab === "all" ? "cursor-grab active:cursor-grabbing" : ""}`}
+                >
+                  {onReorder && activeTab === "all" && (
+                    <div className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <GripVertical className="h-4 w-4 text-muted-foreground/40" />
+                    </div>
+                  )}
+                  <BlockCard block={block} onDelete={onDelete} />
+                </div>
               ))}
             </div>
           ) : (
@@ -110,7 +171,20 @@ export function BlockList({ blocks, onDelete }: BlockListProps) {
               {filteredBlocks.map((block) => {
                 const dateRange = formatDateRange(block.start_date, block.end_date);
                 return (
-                  <div key={block.id} className="flex items-center gap-4 px-4 py-3">
+                  <div
+                    key={block.id}
+                    draggable={!!onReorder && activeTab === "all"}
+                    onDragStart={() => handleDragStart(block.id)}
+                    onDragOver={(e) => handleDragOver(e, block.id)}
+                    onDrop={() => handleDrop(block.id)}
+                    onDragEnd={handleDragEnd}
+                    className={`flex items-center gap-4 px-4 py-3 transition-all duration-150 ${
+                      dragOverId === block.id ? "bg-primary/5" : ""
+                    } ${onReorder && activeTab === "all" ? "cursor-grab active:cursor-grabbing" : ""}`}
+                  >
+                    {onReorder && activeTab === "all" && (
+                      <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/40" />
+                    )}
                     <Badge
                       variant="secondary"
                       className={`w-28 shrink-0 justify-center ${typeBadgeColors[block.type]}`}

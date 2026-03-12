@@ -228,7 +228,7 @@ export default function JobsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-header-in">
         <h1 className="text-2xl font-bold">Job Postings</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>

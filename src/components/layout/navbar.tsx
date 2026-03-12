@@ -3,12 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import useSWR from "swr";
 import {
   Blocks, Briefcase, FileText, Settings, LogOut, User,
   Trophy, Users, Mail, Menu, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+
+const countFetcher = (key: string) => {
+  const url = key.replace("count:", "");
+  return fetch(url).then(r => r.ok ? r.json() : []).then(d => Array.isArray(d) ? d.length : 0).catch(() => 0);
+};
 
 const primaryNav = [
   { label: "Jobs",   href: "/jobs",   icon: Briefcase },
@@ -26,11 +32,28 @@ const secondaryNav = [
 
 const allNav = [...primaryNav, ...secondaryNav];
 
+function NavBadge({ count }: { count: number }) {
+  if (!count) return null;
+  return (
+    <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] font-semibold tabular-nums text-primary">
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const { data: jobCount = 0 } = useSWR<number>("count:/api/jobs", countFetcher, { refreshInterval: 60000 });
+  const { data: contactCount = 0 } = useSWR<number>("count:/api/contacts", countFetcher, { refreshInterval: 60000 });
+
+  const navCounts: Record<string, number> = {
+    "/jobs": jobCount,
+    "/contacts": contactCount,
+  };
 
   async function handleSignOut() {
     if (signingOut) return;
@@ -94,6 +117,7 @@ export function Navbar() {
               >
                 <item.icon className="h-3.5 w-3.5" />
                 {item.label}
+                <NavBadge count={navCounts[item.href] ?? 0} />
                 {active && <span className="absolute -bottom-px left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-primary" />}
               </Link>
             );
@@ -117,6 +141,7 @@ export function Navbar() {
               >
                 <item.icon className="h-3.5 w-3.5" />
                 {item.label}
+                <NavBadge count={navCounts[item.href] ?? 0} />
                 {active && <span className="absolute -bottom-px left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-muted-foreground/50" />}
               </Link>
             );

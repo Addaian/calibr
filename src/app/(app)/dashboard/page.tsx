@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { AnimatedNumber } from "@/components/ui/animated-number";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import type { DashboardData, ActionItem } from "@/app/api/dashboard/route";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -111,7 +113,11 @@ function StatCard({
         <Icon className={`h-4 w-4 ${iconColor}`} />
       </div>
       <div className="min-w-0">
-        <p className="text-2xl font-bold leading-none">{value}</p>
+        <p className="text-2xl font-bold leading-none">
+          {typeof value === "number" ? (
+            <AnimatedNumber value={value} />
+          ) : value}
+        </p>
         <p className="mt-0.5 truncate text-xs text-muted-foreground">{label}</p>
       </div>
     </div>
@@ -192,7 +198,7 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       {/* Header */}
-      <div>
+      <div className="animate-header-in">
         <h1 className="text-2xl font-bold">{greeting()}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Here&apos;s what needs your attention today.
@@ -253,9 +259,9 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          <ActionSection priority="urgent" actions={urgent} />
-          <ActionSection priority="high"   actions={high} />
-          <ActionSection priority="medium" actions={medium} />
+          <ScrollReveal><ActionSection priority="urgent" actions={urgent} /></ScrollReveal>
+          <ScrollReveal delay={100}><ActionSection priority="high"   actions={high} /></ScrollReveal>
+          <ScrollReveal delay={200}><ActionSection priority="medium" actions={medium} /></ScrollReveal>
         </div>
       )}
     </div>

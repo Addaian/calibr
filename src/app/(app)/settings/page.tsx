@@ -65,7 +65,11 @@ export default function SettingsPage() {
                     key={t}
                     variant={theme === t ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setTheme(t)}
+                    onClick={() => {
+                      document.documentElement.classList.add("theme-transition");
+                      setTheme(t);
+                      setTimeout(() => document.documentElement.classList.remove("theme-transition"), 350);
+                    }}
                     className="capitalize"
                   >
                     {t}
