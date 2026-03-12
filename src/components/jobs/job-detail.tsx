@@ -63,7 +63,7 @@ function CollapsibleCard({
   return (
     <Card>
       <CardHeader
-        className="cursor-pointer select-none py-3"
+        className="cursor-pointer select-none py-3 transition-colors hover:bg-accent/50 rounded-t-xl"
         onClick={() => setOpen((o) => !o)}
       >
         <div className="flex items-center justify-between">

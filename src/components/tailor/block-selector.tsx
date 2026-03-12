@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { ExperienceBlock, BlockType } from "@/types/blocks";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 
 const typeLabels: Record<BlockType, string> = {
   work_experience: "Work",
@@ -141,9 +142,17 @@ export function BlockSelector({
       </div>
 
       {filtered.length === 0 && (
-        <p className="py-8 text-center text-muted-foreground">
-          No blocks found. Add some experience blocks first.
-        </p>
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            No blocks found. Add experience blocks to start tailoring.
+          </p>
+          <Button size="sm" variant="outline" asChild>
+            <Link href="/blocks/new">
+              <Plus className="h-3.5 w-3.5" />
+              Add Block
+            </Link>
+          </Button>
+        </div>
       )}
     </div>
   );

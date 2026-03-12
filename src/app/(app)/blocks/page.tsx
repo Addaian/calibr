@@ -1,11 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import useSWR from "swr";
 import { toast } from "sonner";
 import { Blocks, Plus, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { BlockList } from "@/components/blocks/block-list";
 import type { ExperienceBlock } from "@/types/blocks";
 
@@ -13,8 +24,12 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function BlocksPage() {
   const { data, isLoading, error, mutate } = useSWR<ExperienceBlock[]>("/api/blocks", fetcher);
+  const [deleteTarget, setDeleteTarget] = useState<ExperienceBlock | null>(null);
 
-  async function handleDelete(id: string) {
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    const id = deleteTarget.id;
+    setDeleteTarget(null);
     try {
       await fetch(`/api/blocks/${id}`, { method: "DELETE" });
       mutate((prev) => prev?.filter((b) => b.id !== id));
@@ -22,6 +37,11 @@ export default function BlocksPage() {
     } catch {
       toast.error("Failed to delete block");
     }
+  }
+
+  function handleDelete(id: string) {
+    const block = data?.find((b) => b.id === id);
+    if (block) setDeleteTarget(block);
   }
 
   async function handleReorder(reordered: ExperienceBlock[]) {
@@ -109,6 +129,23 @@ export default function BlocksPage() {
           onReorder={handleReorder}
         />
       )}
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete block?</AlertDialogTitle>
+            <AlertDialogDescription>
+              &ldquo;{deleteTarget?.title}&rdquo; will be permanently deleted. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

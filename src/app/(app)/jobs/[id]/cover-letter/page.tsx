@@ -156,8 +156,10 @@ export default function CoverLetterPage() {
             <Button
               variant="outline"
               onClick={() => {
-                setGenerated(false);
-                setContent("");
+                if (window.confirm("Regenerating will replace your current cover letter. Continue?")) {
+                  setGenerated(false);
+                  setContent("");
+                }
               }}
             >
               Regenerate

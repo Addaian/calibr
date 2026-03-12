@@ -47,8 +47,8 @@ export function Navbar() {
   const [signingOut, setSigningOut] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const { data: jobCount = 0 } = useSWR<number>("count:/api/jobs", countFetcher, { refreshInterval: 60000 });
-  const { data: contactCount = 0 } = useSWR<number>("count:/api/contacts", countFetcher, { refreshInterval: 60000 });
+  const { data: jobCount = 0 } = useSWR<number>("count:/api/jobs", countFetcher, { refreshInterval: 60000, revalidateOnFocus: true });
+  const { data: contactCount = 0 } = useSWR<number>("count:/api/contacts", countFetcher, { refreshInterval: 60000, revalidateOnFocus: true });
 
   const navCounts: Record<string, number> = {
     "/jobs": jobCount,
