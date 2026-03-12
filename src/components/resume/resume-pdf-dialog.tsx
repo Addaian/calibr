@@ -5,7 +5,8 @@ import { ResumePDF } from "./resume-pdf";
 import type { TailoredContent } from "@/types/resumes";
 import type { ResumeProfile } from "./resume-pdf";
 import { Button } from "@/components/ui/button";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, Code } from "lucide-react";
+import { downloadAsLatex } from "@/lib/resume-latex";
 
 interface ResumePdfDialogProps {
   content: TailoredContent;
@@ -39,6 +40,14 @@ export function ResumePdfDialog({
             <FileText className="mr-1.5 h-3.5 w-3.5" />
             Download DOCX
           </a>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => downloadAsLatex(content, profile, filename)}
+        >
+          <Code className="mr-1.5 h-3.5 w-3.5" />
+          Download LaTeX
         </Button>
       </div>
 

@@ -66,7 +66,14 @@ export default function BlocksPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex items-start justify-between gap-4 animate-header-in">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Experience Blocks</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Experience Blocks
+            {data && data.length > 0 && (
+              <span className="ml-2 text-sm font-normal text-muted-foreground">
+                {data.length} block{data.length !== 1 ? "s" : ""}
+              </span>
+            )}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">Your reusable career building blocks — used to tailor every resume.</p>
         </div>
         <div className="flex shrink-0 gap-2">

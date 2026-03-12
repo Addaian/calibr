@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TagChipInput } from "@/components/ui/tag-chip-input";
 import type { ExperienceBlock, BlockType } from "@/types/blocks";
 
 const blockTypeOptions: { value: BlockType; label: string }[] = [
@@ -111,8 +112,9 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
     initialData?.bullet_points ?? [""]
   );
   const [technologies, setTechnologies] = useState<string[]>(
-    initialData?.technologies ?? [""]
+    initialData?.technologies ?? []
   );
+  const [currentRole, setCurrentRole] = useState(!initialData?.end_date);
   const [gpa, setGpa] = useState(
     (initialData?.metadata?.gpa as string) ?? ""
   );
@@ -137,26 +139,10 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
     setBulletPoints(updated);
   }
 
-  function addTechnology() {
-    setTechnologies([...technologies, ""]);
-  }
-
-  function removeTechnology(index: number) {
-    setTechnologies(technologies.filter((_, i) => i !== index));
-  }
-
-  function updateTechnology(index: number, value: string) {
-    const updated = [...technologies];
-    updated[index] = value;
-    setTechnologies(updated);
-  }
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    const metadata: Record<string, unknown> = {
-      ...(initialData?.metadata ?? {}),
-    };
+    const metadata: Record<string, unknown> = {};
 
     if (type === "education") {
       if (gpa) metadata.gpa = gpa;
@@ -173,7 +159,7 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
       organization: organization || null,
       location: location || null,
       start_date: startDate || null,
-      end_date: endDate || null,
+      end_date: currentRole ? null : endDate || null,
       description: description || null,
       bullet_points: bulletPoints.filter((bp) => bp.trim() !== ""),
       technologies: technologies.filter((tech) => tech.trim() !== ""),
@@ -255,9 +241,22 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
                     <Input
                       id="end_date"
                       type="date"
-                      value={endDate}
+                      value={currentRole ? "" : endDate}
                       onChange={(e) => setEndDate(e.target.value)}
+                      disabled={currentRole}
                     />
+                    <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={currentRole}
+                        onChange={(e) => {
+                          setCurrentRole(e.target.checked);
+                          if (e.target.checked) setEndDate("");
+                        }}
+                        className="h-3.5 w-3.5 rounded"
+                      />
+                      Currently working here
+                    </label>
                   </div>
                 </>
               )}
@@ -309,34 +308,11 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
 
           <div className="space-y-2">
             <Label>Technologies</Label>
-            <div className="space-y-2">
-              {technologies.map((tech, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Input
-                    value={tech}
-                    onChange={(e) => updateTechnology(index, e.target.value)}
-                    placeholder="e.g. React, Python, AWS..."
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={() => removeTechnology(index)}
-                  >
-                    <X />
-                  </Button>
-                </div>
-              ))}
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addTechnology}
-            >
-              <Plus />
-              Add technology
-            </Button>
+            <TagChipInput
+              items={technologies}
+              onChange={setTechnologies}
+              placeholder="e.g. React, Python, AWS — press Enter or comma"
+            />
           </div>
 
           {type === "education" && (

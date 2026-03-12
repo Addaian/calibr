@@ -29,11 +29,11 @@ const typeLabels: Record<BlockType, string> = {
 };
 
 const typeBadgeColors: Record<BlockType, string> = {
-  work_experience: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  project: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-  education: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  volunteering: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
-  research: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300",
+  work_experience: "bg-blue-500/10 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400",
+  project: "bg-violet-500/10 text-violet-700 dark:bg-violet-500/15 dark:text-violet-400",
+  education: "bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-400",
+  volunteering: "bg-pink-500/10 text-pink-700 dark:bg-pink-500/15 dark:text-pink-400",
+  research: "bg-cyan-500/10 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-400",
 };
 
 interface BlockListProps {
@@ -107,13 +107,21 @@ export function BlockList({ blocks, onDelete, onReorder }: BlockListProps) {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <div className="mb-4 flex items-center justify-between gap-2">
-        <TabsList className="flex-wrap">
-          {filterTabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="flex items-center gap-3">
+          <TabsList className="flex-wrap">
+            {filterTabs.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          {onReorder && activeTab !== "all" && (
+            <p className="text-xs text-muted-foreground/60">
+              Switch to All to reorder
+            </p>
+          )}
+        </div>
 
         <div className="flex items-center rounded-md border p-0.5">
           <Tooltip>
@@ -148,7 +156,7 @@ export function BlockList({ blocks, onDelete, onReorder }: BlockListProps) {
       {filterTabs.map((tab) => (
         <TabsContent key={tab.value} value={tab.value}>
           {filteredBlocks.length === 0 ? empty : view === "grid" ? (
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredBlocks.map((block) => (
                 <div
                   key={block.id}
@@ -157,9 +165,9 @@ export function BlockList({ blocks, onDelete, onReorder }: BlockListProps) {
                   onDragOver={(e) => handleDragOver(e, block.id)}
                   onDrop={() => handleDrop(block.id)}
                   onDragEnd={handleDragEnd}
-                  className={`group/drag relative transition-all duration-150 ${
+                  className={`group/drag relative overflow-hidden rounded-xl transition-all duration-150 ${
                     dragOverId === block.id
-                      ? "scale-[1.02] ring-2 ring-primary/30 rounded-xl"
+                      ? "scale-[1.02] ring-2 ring-primary/30"
                       : ""
                   } ${onReorder && activeTab === "all" ? "cursor-grab active:cursor-grabbing" : ""}`}
                 >
@@ -185,7 +193,7 @@ export function BlockList({ blocks, onDelete, onReorder }: BlockListProps) {
                     onDrop={() => handleDrop(block.id)}
                     onDragEnd={handleDragEnd}
                     className={`flex items-center gap-4 px-4 py-3 transition-all duration-150 ${
-                      dragOverId === block.id ? "bg-primary/5" : ""
+                      dragOverId === block.id ? "ring-2 ring-inset ring-primary/30 bg-primary/5" : ""
                     } ${onReorder && activeTab === "all" ? "cursor-grab active:cursor-grabbing" : ""}`}
                   >
                     {onReorder && activeTab === "all" && (

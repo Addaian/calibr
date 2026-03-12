@@ -93,11 +93,11 @@ export default function ImportPage() {
     setSaving(true);
     try {
       const responses = await Promise.all(
-        toSave.map((block) =>
+        toSave.map((block, i) =>
           fetch("/api/blocks", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...block, sort_order: 0 }),
+            body: JSON.stringify({ ...block, sort_order: i }),
           }).then((r) => r.json())
         )
       );
@@ -127,8 +127,23 @@ export default function ImportPage() {
     }
   }
 
+  const typeCounts = parsedBlocks
+    ? parsedBlocks.reduce<Record<string, number>>((acc, b) => {
+        acc[b.type] = (acc[b.type] ?? 0) + 1;
+        return acc;
+      }, {})
+    : null;
+
+  const typeDisplayNames: Record<string, string> = {
+    work_experience: "Work",
+    education: "Education",
+    project: "Project",
+    research: "Research",
+    volunteering: "Volunteering",
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <div className="animate-header-in flex items-center gap-4">
         <Link href="/blocks">
           <Button variant="ghost" size="icon">
@@ -184,6 +199,15 @@ export default function ImportPage() {
 
       {parsedBlocks && (
         <div className="space-y-4">
+          {typeCounts && (
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(typeCounts).map(([type, count]) => (
+                <Badge key={type} variant="secondary" className="text-xs">
+                  {count} {typeDisplayNames[type] ?? type}
+                </Badge>
+              ))}
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               {included.size} of {parsedBlocks.length} blocks selected

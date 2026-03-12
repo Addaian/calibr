@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { X, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,78 +14,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { TagChipInput } from "@/components/ui/tag-chip-input";
 
 interface SkillCategory {
   category: string;
   items: string[];
-}
-
-// ─── Tag chip input ───────────────────────────────────────────────────────────
-
-function TagChipInput({
-  items,
-  onChange,
-  placeholder = "Type and press Enter…",
-}: {
-  items: string[];
-  onChange: (items: string[]) => void;
-  placeholder?: string;
-}) {
-  const [input, setInput] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  function commit() {
-    const trimmed = input.trim().replace(/,+$/, "").trim();
-    if (trimmed && !items.includes(trimmed)) {
-      onChange([...items, trimmed]);
-    }
-    setInput("");
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      commit();
-    } else if (e.key === "Backspace" && input === "" && items.length > 0) {
-      onChange(items.slice(0, -1));
-    }
-  }
-
-  function removeItem(i: number) {
-    onChange(items.filter((_, idx) => idx !== i));
-  }
-
-  return (
-    <div
-      className="flex min-h-10 flex-wrap gap-1.5 rounded-md border bg-background px-3 py-2 text-sm cursor-text"
-      onClick={() => inputRef.current?.focus()}
-    >
-      {items.map((item, i) => (
-        <span
-          key={i}
-          className="flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-xs font-medium"
-        >
-          {item}
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); removeItem(i); }}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <X className="h-3 w-3" />
-          </button>
-        </span>
-      ))}
-      <input
-        ref={inputRef}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onBlur={commit}
-        placeholder={items.length === 0 ? placeholder : ""}
-        className="min-w-24 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
-      />
-    </div>
-  );
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────

@@ -196,6 +196,11 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
               ))}
             </ul>
           )}
+          {block.bullet_points.length > 1 && (
+            <p className="text-[10px] text-muted-foreground/60">
+              +{block.bullet_points.length - 1} more bullet{block.bullet_points.length > 2 ? "s" : ""}
+            </p>
+          )}
           {block.technologies.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {block.technologies.slice(0, 5).map((tech) => (
