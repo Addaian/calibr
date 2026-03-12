@@ -121,86 +121,89 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
         {/* Gloss reflection layer */}
         <div className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100 dark:from-white/5" />
 
-        <CardHeader className="px-3 pb-0.5 pt-2">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex min-w-0 flex-1 items-center gap-2">
-              <Badge
-                variant="secondary"
-                className={`shrink-0 px-1.5 py-0 text-[10px] ${typeBadgeColors[block.type]}`}
+        {/* Action buttons — absolute overlay, top-right, shown on hover */}
+        <div className="absolute right-1.5 top-1.5 z-10 flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+          {confirming && (
+            <span className="animate-in fade-in text-xs font-medium text-destructive">
+              Delete?
+            </span>
+          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                asChild
               >
-                {typeLabels[block.type]}
-              </Badge>
-              <CardTitle className="truncate text-sm">{block.title}</CardTitle>
-            </div>
-            <div className="flex shrink-0 items-center gap-0.5">
-              {confirming && (
-                <span className="animate-in fade-in text-xs font-medium text-destructive">
-                  Delete?
+                <Link href={`/blocks/${block.id}/edit`} onClick={(e) => e.stopPropagation()}>
+                  <Pencil />
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Edit</TooltipContent>
+          </Tooltip>
+          {onDelete && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={confirming ? "destructive" : "ghost"}
+                  size="icon-xs"
+                  onClick={handleTrashClick}
+                >
+                  <Trash2 />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{confirming ? "Click to confirm" : "Delete"}</TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+
+        <div className="px-3 py-2 space-y-1">
+          {/* Badge + title */}
+          <div className="flex min-w-0 items-center gap-1.5">
+            <Badge
+              variant="secondary"
+              className={`shrink-0 px-1.5 py-0 text-[10px] ${typeBadgeColors[block.type]}`}
+            >
+              {typeLabels[block.type]}
+            </Badge>
+            <p className="min-w-0 truncate text-sm font-semibold leading-tight">{block.title}</p>
+          </div>
+
+          {/* Org / location / date */}
+          {(block.organization || block.location || dateRange) && (
+            <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0 text-xs text-muted-foreground">
+              {block.organization && (
+                <span className="min-w-0 truncate font-medium">{block.organization}</span>
+              )}
+              {block.location && (
+                <span className="inline-flex min-w-0 items-center gap-0.5">
+                  <MapPin className="size-3 shrink-0" />
+                  <span className="truncate">{block.location}</span>
                 </span>
               )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    asChild
-                  >
-                    <Link href={`/blocks/${block.id}/edit`} onClick={(e) => e.stopPropagation()}>
-                      <Pencil />
-                    </Link>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Edit</TooltipContent>
-              </Tooltip>
-              {onDelete && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={confirming ? "destructive" : "ghost"}
-                      size="icon-xs"
-                      onClick={handleTrashClick}
-                    >
-                      <Trash2 />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{confirming ? "Click to confirm" : "Delete"}</TooltipContent>
-                </Tooltip>
+              {dateRange && (
+                <span className="inline-flex shrink-0 items-center gap-0.5">
+                  <Calendar className="size-3 shrink-0" />
+                  {dateRange}
+                </span>
               )}
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-0.5 px-3 pb-2">
-          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-            {block.organization && (
-              <span className="min-w-0 truncate font-medium">{block.organization}</span>
-            )}
-            {block.location && (
-              <span className="inline-flex min-w-0 items-center gap-0.5">
-                <MapPin className="size-3 shrink-0" />
-                <span className="truncate">{block.location}</span>
-              </span>
-            )}
-            {dateRange && (
-              <span className="inline-flex shrink-0 items-center gap-0.5">
-                <Calendar className="size-3 shrink-0" />
-                {dateRange}
-              </span>
-            )}
-          </div>
+          )}
+
+          {/* Bullet preview */}
           {block.bullet_points.length > 0 && (
-            <ul className="list-inside list-disc space-y-0 text-xs text-muted-foreground">
-              {block.bullet_points.slice(0, 1).map((point, i) => (
-                <li key={i} className="overflow-hidden text-ellipsis whitespace-nowrap">
-                  {point}
-                </li>
-              ))}
-            </ul>
+            <p className="truncate text-xs text-muted-foreground">
+              · {block.bullet_points[0]}
+            </p>
           )}
           {block.bullet_points.length > 1 && (
             <p className="text-[10px] text-muted-foreground/60">
               +{block.bullet_points.length - 1} more bullet{block.bullet_points.length > 2 ? "s" : ""}
             </p>
           )}
+
+          {/* Tech chips */}
           {block.technologies.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {block.technologies.slice(0, 5).map((tech) => (
@@ -213,7 +216,7 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
               )}
             </div>
           )}
-        </CardContent>
+        </div>
       </Card>
 
       {/* ── Expanded detail dialog ── */}

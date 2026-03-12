@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -115,6 +116,7 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
     initialData?.technologies ?? []
   );
   const [currentRole, setCurrentRole] = useState(!initialData?.end_date);
+  const [generatingTags, setGeneratingTags] = useState(false);
   const [gpa, setGpa] = useState(
     (initialData?.metadata?.gpa as string) ?? ""
   );
@@ -137,6 +139,38 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
     const updated = [...bulletPoints];
     updated[index] = value;
     setBulletPoints(updated);
+  }
+
+  async function handleSuggestTags() {
+    const filled = bulletPoints.filter((b) => b.trim());
+    if (!description && !filled.length && !title) {
+      toast.error("Add a description or bullet points first");
+      return;
+    }
+    setGeneratingTags(true);
+    try {
+      const res = await fetch("/api/blocks/suggest-tags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, description, bullet_points: filled }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      const incoming: string[] = data.tags ?? [];
+      // Merge with existing, skip case-insensitive dupes
+      const merged = [...technologies];
+      for (const tag of incoming) {
+        if (!merged.some((t) => t.toLowerCase() === tag.toLowerCase())) {
+          merged.push(tag);
+        }
+      }
+      setTechnologies(merged);
+      toast.success(`Added ${merged.length - technologies.length} tag${merged.length - technologies.length !== 1 ? "s" : ""}`);
+    } catch {
+      toast.error("Failed to generate tags");
+    } finally {
+      setGeneratingTags(false);
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -307,7 +341,20 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label>Technologies</Label>
+            <div className="flex items-center justify-between">
+              <Label>Technologies</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-auto py-0.5 text-xs text-muted-foreground"
+                onClick={handleSuggestTags}
+                disabled={generatingTags}
+              >
+                <Sparkles className="mr-1 h-3 w-3" />
+                {generatingTags ? "Generating…" : "Autogenerate"}
+              </Button>
+            </div>
             <TagChipInput
               items={technologies}
               onChange={setTechnologies}

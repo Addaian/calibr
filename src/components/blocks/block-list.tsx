@@ -171,11 +171,6 @@ export function BlockList({ blocks, onDelete, onReorder }: BlockListProps) {
                       : ""
                   } ${onReorder && activeTab === "all" ? "cursor-grab active:cursor-grabbing" : ""}`}
                 >
-                  {onReorder && activeTab === "all" && (
-                    <div className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/drag:opacity-100 transition-opacity">
-                      <GripVertical className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  )}
                   <BlockCard block={block} onDelete={onDelete} />
                 </div>
               ))}
