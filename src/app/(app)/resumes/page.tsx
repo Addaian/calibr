@@ -83,7 +83,7 @@ export default function ResumesPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div>
+      <div className="animate-header-in">
         <h1 className="text-2xl font-bold tracking-tight">Library</h1>
         <p className="mt-1 text-sm text-muted-foreground">Your generated resumes and cover letters.</p>
       </div>

@@ -129,7 +129,7 @@ export default function ImportPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="animate-header-in flex items-center gap-4">
         <Link href="/blocks">
           <Button variant="ghost" size="icon">
             <ArrowLeft className="h-4 w-4" />

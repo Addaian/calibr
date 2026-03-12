@@ -172,7 +172,7 @@ export default function PersonalInfoPage() {
   if (fetching) {
     return (
       <div className="space-y-8">
-        <h1 className="text-3xl font-bold tracking-tight">Personal Information</h1>
+        <h1 className="animate-header-in text-3xl font-bold tracking-tight">Personal Information</h1>
         <div className="max-w-2xl animate-pulse space-y-4 rounded-xl border p-6">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="h-10 rounded bg-muted" />
@@ -184,7 +184,7 @@ export default function PersonalInfoPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold tracking-tight">Personal Information</h1>
+      <h1 className="animate-header-in text-3xl font-bold tracking-tight">Personal Information</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
         {/* Personal Information */}

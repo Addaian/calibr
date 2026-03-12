@@ -122,7 +122,7 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
     <>
       <Card
         ref={cardRef}
-        onClick={() => setDialogOpen(true)}
+        onClick={() => { handleMouseLeave(); setDialogOpen(true); }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         className={`group relative cursor-pointer overflow-hidden border-t-2 ${typeBorderColors[block.type]} transition-[box-shadow] duration-200 will-change-transform hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20`}

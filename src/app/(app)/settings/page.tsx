@@ -33,7 +33,7 @@ export default function SettingsPage() {
   if (!mounted) {
     return (
       <div className="space-y-8">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <h1 className="animate-header-in text-3xl font-bold tracking-tight">Settings</h1>
         <div className="max-w-2xl animate-pulse space-y-4 rounded-xl border p-6">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="h-10 rounded bg-muted" />
@@ -45,7 +45,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+      <h1 className="animate-header-in text-3xl font-bold tracking-tight">Settings</h1>
 
       <div className="max-w-2xl space-y-6">
         {/* Appearance */}

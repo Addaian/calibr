@@ -91,6 +91,7 @@ function StatCard({
   icon: Icon,
   label,
   value,
+  suffix,
   borderColor,
   iconBg,
   iconColor,
@@ -99,6 +100,7 @@ function StatCard({
   icon: React.ElementType;
   label: string;
   value: string | number;
+  suffix?: string;
   borderColor: string;
   iconBg: string;
   iconColor: string;
@@ -115,7 +117,7 @@ function StatCard({
       <div className="min-w-0">
         <p className="text-2xl font-bold leading-none">
           {typeof value === "number" ? (
-            <AnimatedNumber value={value} />
+            <AnimatedNumber value={value} suffix={suffix} />
           ) : value}
         </p>
         <p className="mt-0.5 truncate text-xs text-muted-foreground">{label}</p>
@@ -223,7 +225,8 @@ export default function DashboardPage() {
           <StatCard
             icon={Sparkles}
             label="Avg fit score"
-            value={data.stats.avg_fit_score !== null ? `${data.stats.avg_fit_score}%` : "—"}
+            value={data.stats.avg_fit_score !== null ? data.stats.avg_fit_score : "—"}
+            suffix={data.stats.avg_fit_score !== null ? "%" : undefined}
             borderColor="border-t-green-500/40" iconBg="bg-green-500/10" iconColor="text-green-600 dark:text-green-400" index={3}
           />
         </div>

@@ -151,15 +151,15 @@ export function BlockList({ blocks, onDelete, onReorder }: BlockListProps) {
                   onDragOver={(e) => handleDragOver(e, block.id)}
                   onDrop={() => handleDrop(block.id)}
                   onDragEnd={handleDragEnd}
-                  className={`relative transition-all duration-150 ${
+                  className={`group/drag relative transition-all duration-150 ${
                     dragOverId === block.id
                       ? "scale-[1.02] ring-2 ring-primary/30 rounded-xl"
                       : ""
                   } ${onReorder && activeTab === "all" ? "cursor-grab active:cursor-grabbing" : ""}`}
                 >
                   {onReorder && activeTab === "all" && (
-                    <div className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <GripVertical className="h-4 w-4 text-muted-foreground/40" />
+                    <div className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/drag:opacity-60 transition-opacity">
+                      <GripVertical className="h-4 w-4 text-muted-foreground" />
                     </div>
                   )}
                   <BlockCard block={block} onDelete={onDelete} />

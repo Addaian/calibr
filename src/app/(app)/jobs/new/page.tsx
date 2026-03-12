@@ -117,7 +117,7 @@ export default function NewJobPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h1 className="text-2xl font-bold">Add Job Posting</h1>
+      <h1 className="animate-header-in text-2xl font-bold">Add Job Posting</h1>
 
       <Card>
         <CardContent className="pt-6">

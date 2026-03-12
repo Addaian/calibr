@@ -74,7 +74,7 @@ export default function ComparePage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex items-center gap-3">
+      <div className="animate-header-in flex items-center gap-3">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/jobs"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>

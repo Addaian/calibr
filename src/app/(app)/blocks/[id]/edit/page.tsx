@@ -48,7 +48,7 @@ export default function EditBlockPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="animate-header-in flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/blocks">
             <ArrowLeft />
