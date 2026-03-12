@@ -127,12 +127,10 @@ function skillLine(label: string, value: string) {
   });
 }
 
-// ─── Date helpers ─────────────────────────────────────────────────────────────
+import { formatDate } from "@/lib/format-date";
+import { DEFAULT_SECTION_ORDER as SECTION_ORDER, SECTION_TITLES_UPPER as SECTION_TITLES } from "@/lib/resume-constants";
 
-function formatDate(d: string | null | undefined): string {
-  if (!d) return "Present";
-  return new Date(d).toLocaleDateString("en-US", { month: "short", year: "numeric" });
-}
+// ─── Date helpers ─────────────────────────────────────────────────────────────
 
 function formatRight(
   location: string | null,
@@ -146,26 +144,6 @@ function formatRight(
   if (location) return location;
   return dateRange;
 }
-
-// ─── Section ordering ─────────────────────────────────────────────────────────
-
-const SECTION_ORDER = [
-  "education",
-  "work_experience",
-  "research",
-  "project",
-  "volunteering",
-  "skill",
-];
-
-const SECTION_TITLES: Record<string, string> = {
-  education: "EDUCATION",
-  work_experience: "WORK EXPERIENCE",
-  research: "RESEARCH EXPERIENCE",
-  project: "PROJECT EXPERIENCE",
-  volunteering: "LEADERSHIP EXPERIENCE",
-  skill: "SKILLS & INTERESTS",
-};
 
 // ─── Main builder ─────────────────────────────────────────────────────────────
 

@@ -1,23 +1,6 @@
 import type { TailoredContent } from "@/types/resumes";
 import type { ResumeProfile } from "@/components/resume/resume-pdf";
-
-const SECTION_TITLES: Record<string, string> = {
-  education: "Education",
-  work_experience: "Professional Experience",
-  research: "Research Experience",
-  project: "Project Experience",
-  volunteering: "Leadership and Activities",
-  skill: "Skills and Interests",
-};
-
-const DEFAULT_SECTION_ORDER = [
-  "education",
-  "work_experience",
-  "research",
-  "project",
-  "volunteering",
-  "skill",
-];
+import { DEFAULT_SECTION_ORDER, SECTION_TITLES_LATEX as SECTION_TITLES } from "@/lib/resume-constants";
 
 function esc(s: string | null | undefined): string {
   if (!s) return "";

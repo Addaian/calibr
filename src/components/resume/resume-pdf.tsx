@@ -29,32 +29,10 @@ const ITALIC = "Times-Italic";
 
 const BODY_PT = 11;
 const NAME_PT = 22;
+import { formatDate } from "@/lib/format-date";
+import { DEFAULT_SECTION_ORDER, SECTION_TITLES_UPPER as SECTION_TITLES } from "@/lib/resume-constants";
+
 const MARGIN_PT = 54; // 0.75 inch
-
-const DEFAULT_SECTION_ORDER = [
-  "education",
-  "work_experience",
-  "research",
-  "project",
-  "volunteering",
-  "skill",
-];
-
-const SECTION_TITLES: Record<string, string> = {
-  education: "EDUCATION",
-  work_experience: "WORK EXPERIENCE",
-  research: "RESEARCH EXPERIENCE",
-  project: "PROJECT EXPERIENCE",
-  volunteering: "LEADERSHIP EXPERIENCE",
-  skill: "SKILLS & INTERESTS",
-};
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatDate(d: string | null | undefined): string {
-  if (!d) return "Present";
-  return new Date(d).toLocaleDateString("en-US", { month: "short", year: "numeric" });
-}
 
 function formatRight(location: string | null, start: string | null, end: string | null): string {
   const dateRange = start ? `${formatDate(start)} \u2013 ${formatDate(end)}` : "";

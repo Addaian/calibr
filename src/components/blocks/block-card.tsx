@@ -14,6 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import type { ExperienceBlock, BlockType } from "@/types/blocks";
+import { formatDateRange } from "@/lib/format-date";
 
 const typeLabels: Record<BlockType, string> = {
   work_experience: "Work Experience",
@@ -38,21 +39,6 @@ const typeBorderColors: Record<BlockType, string> = {
   volunteering: "border-t-pink-500/40",
   research: "border-t-cyan-500/40",
 };
-
-function formatDateRange(startDate: string | null, endDate: string | null): string | null {
-  if (!startDate) return null;
-  const start = new Date(startDate).toLocaleDateString("en-US", {
-    month: "short",
-    year: "numeric",
-  });
-  const end = endDate
-    ? new Date(endDate).toLocaleDateString("en-US", {
-        month: "short",
-        year: "numeric",
-      })
-    : "Present";
-  return `${start} - ${end}`;
-}
 
 interface BlockCardProps {
   block: ExperienceBlock;

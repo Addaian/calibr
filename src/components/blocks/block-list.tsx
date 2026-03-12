@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BlockCard } from "@/components/blocks/block-card";
 import type { ExperienceBlock, BlockType } from "@/types/blocks";
+import { formatDateRange } from "@/lib/format-date";
 
 const filterTabs: { value: string; label: string }[] = [
   { value: "all", label: "All" },
@@ -33,12 +34,6 @@ const typeBadgeColors: Record<BlockType, string> = {
   volunteering: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
   research: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300",
 };
-
-function formatDateRange(startDate: string | null, endDate: string | null) {
-  if (!startDate) return null;
-  const fmt = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", year: "numeric" });
-  return `${fmt(startDate)} – ${endDate ? fmt(endDate) : "Present"}`;
-}
 
 interface BlockListProps {
   blocks: ExperienceBlock[];

@@ -1,14 +1,5 @@
 import type { ExperienceBlock } from "@/types/blocks";
-
-function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function containsKeyword(corpus: string, keyword: string): boolean {
-  const lower = keyword.toLowerCase();
-  const pattern = new RegExp("\\b" + escapeRegex(lower) + "\\b", "i");
-  return pattern.test(corpus);
-}
+import { containsKeyword } from "@/lib/text-utils";
 
 export function buildCorpusFromBlocks(
   blocks: ExperienceBlock[],

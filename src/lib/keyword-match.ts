@@ -1,20 +1,10 @@
 import type { TailoredContent } from "@/types/resumes";
+import { containsKeyword } from "@/lib/text-utils";
 
 export interface KeywordMatchResult {
   keyword: string;
   source: "required" | "preferred" | "general";
   found: boolean;
-}
-
-function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function containsKeyword(corpus: string, keyword: string): boolean {
-  const lower = keyword.toLowerCase();
-  // Word-boundary match handles most cases (avoids "Go" matching "going")
-  const pattern = new RegExp("\\b" + escapeRegex(lower) + "\\b", "i");
-  return pattern.test(corpus);
 }
 
 export function matchKeywords(

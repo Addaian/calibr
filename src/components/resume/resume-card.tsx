@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import type { GeneratedResume, TailoredBlock } from "@/types/resumes";
 import type { ResumeProfile } from "@/components/resume/resume-pdf";
+import { formatDate } from "@/lib/format-date";
 
 // Lazy-load the real PDF viewer only when the dialog opens
 const ResumePdfDialog = dynamic(
@@ -29,10 +30,6 @@ const ResumePdfDialog = dynamic(
 );
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatDate(d: string): string {
-  return new Date(d).toLocaleDateString("en-US", { month: "short", year: "numeric" });
-}
 
 function fitPillClass(score: number | null) {
   if (score === null) return "bg-zinc-500/8 text-zinc-500 dark:bg-zinc-500/15 dark:text-zinc-400";

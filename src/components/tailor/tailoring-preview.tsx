@@ -4,14 +4,10 @@ import type { TailoredContent } from "@/types/resumes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { formatDate } from "@/lib/format-date";
 
 interface TailoringPreviewProps {
   content: TailoredContent;
-}
-
-function formatDate(d: string | null) {
-  if (!d) return "Present";
-  return new Date(d).toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
 
 export function TailoringPreview({ content }: TailoringPreviewProps) {
