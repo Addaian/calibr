@@ -198,7 +198,7 @@ export default function DashboardPage() {
   const medium = data?.actions.filter((a) => a.priority === "medium") ?? [];
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8">
+    <div className="mx-auto max-w-2xl lg:max-w-4xl space-y-8">
       {/* Header */}
       <div className="animate-header-in">
         <h1 className="text-2xl font-bold">{greeting()}</h1>

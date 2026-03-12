@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ExperienceBlock, BlockType } from "@/types/blocks";
 import { formatDateRange } from "@/lib/format-date";
 
@@ -137,23 +138,33 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
                   Delete?
                 </span>
               )}
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                asChild
-              >
-                <Link href={`/blocks/${block.id}/edit`} onClick={(e) => e.stopPropagation()}>
-                  <Pencil />
-                </Link>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    asChild
+                  >
+                    <Link href={`/blocks/${block.id}/edit`} onClick={(e) => e.stopPropagation()}>
+                      <Pencil />
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Edit</TooltipContent>
+              </Tooltip>
               {onDelete && (
-                <Button
-                  variant={confirming ? "destructive" : "ghost"}
-                  size="icon-xs"
-                  onClick={handleTrashClick}
-                >
-                  <Trash2 />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={confirming ? "destructive" : "ghost"}
+                      size="icon-xs"
+                      onClick={handleTrashClick}
+                    >
+                      <Trash2 />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{confirming ? "Click to confirm" : "Delete"}</TooltipContent>
+                </Tooltip>
               )}
             </div>
           </div>

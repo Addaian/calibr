@@ -9,6 +9,7 @@ import {
   Trophy, Users, Mail, Menu, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { createClient } from "@/lib/supabase/client";
 
 const countFetcher = (key: string) => {
@@ -17,8 +18,8 @@ const countFetcher = (key: string) => {
 };
 
 const primaryNav = [
-  { label: "Jobs",   href: "/jobs",   icon: Briefcase },
-  { label: "Blocks", href: "/blocks", icon: Blocks },
+  { label: "Jobs",   href: "/jobs",   icon: Briefcase, shortcut: "⌘J" },
+  { label: "Blocks", href: "/blocks", icon: Blocks,    shortcut: "⌘B" },
 ];
 
 const secondaryNav = [
@@ -106,20 +107,26 @@ export function Navbar() {
           {primaryNav.map(item => {
             const active = isActive(item.href);
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`relative flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold transition-all duration-150 hover:-translate-y-px ${
-                  active
-                    ? "text-foreground"
-                    : "text-foreground hover:bg-accent"
-                }`}
-              >
-                <item.icon className="h-3.5 w-3.5" />
-                {item.label}
-                <NavBadge count={navCounts[item.href] ?? 0} />
-                {active && <span className="absolute -bottom-px left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-primary" />}
-              </Link>
+              <Tooltip key={item.href}>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={item.href}
+                    className={`relative flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold transition-all duration-150 hover:-translate-y-px ${
+                      active
+                        ? "text-foreground"
+                        : "text-foreground hover:bg-accent"
+                    }`}
+                  >
+                    <item.icon className="h-3.5 w-3.5" />
+                    {item.label}
+                    <NavBadge count={navCounts[item.href] ?? 0} />
+                    {active && <span className="absolute -bottom-px left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-primary" />}
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span className="flex items-center gap-1.5">{item.label} <kbd className="rounded bg-primary-foreground/20 px-1 text-[10px]">{item.shortcut}</kbd></span>
+                </TooltipContent>
+              </Tooltip>
             );
           })}
 

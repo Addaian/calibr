@@ -12,6 +12,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { StatusSwitcher, type Status } from "@/components/jobs/status-switcher";
 import { InlineText, InlineDate, InlineSource, InlinePriority } from "@/components/jobs/job-cells";
 import { CsvImportDialog } from "@/components/jobs/csv-import-dialog";
@@ -235,12 +236,19 @@ export default function JobsPage() {
             <Upload className="size-4" />
             Import CSV
           </Button>
-          <Button asChild>
-            <Link href="/jobs/new">
-              <Plus className="size-4" />
-              Add Job
-            </Link>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button asChild>
+                <Link href="/jobs/new">
+                  <Plus className="size-4" />
+                  Add Job
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <span className="flex items-center gap-1.5">Add Job <kbd className="rounded bg-primary-foreground/20 px-1 text-[10px]">⌘N</kbd></span>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
@@ -250,21 +258,24 @@ export default function JobsPage() {
       <div className="flex items-center gap-2">
         <div className="flex items-center rounded-md border p-0.5">
           {([
-            { mode: "list" as const,    icon: <List className="h-3.5 w-3.5" />,         title: "List" },
-            { mode: "compact" as const, icon: <AlignJustify className="h-3.5 w-3.5" />, title: "Compact" },
-            { mode: "kanban" as const,  icon: <LayoutGrid className="h-3.5 w-3.5" />,   title: "Kanban" },
-            { mode: "sankey" as const,  icon: <GitFork className="h-3.5 w-3.5" />,      title: "Pipeline" },
+            { mode: "list" as const,    icon: <List className="h-3.5 w-3.5" />,         title: "List view" },
+            { mode: "compact" as const, icon: <AlignJustify className="h-3.5 w-3.5" />, title: "Compact view" },
+            { mode: "kanban" as const,  icon: <LayoutGrid className="h-3.5 w-3.5" />,   title: "Kanban board" },
+            { mode: "sankey" as const,  icon: <GitFork className="h-3.5 w-3.5" />,      title: "Pipeline diagram" },
           ] as const).map(({ mode, icon, title }) => (
-            <Button
-              key={mode}
-              variant={viewMode === mode ? "secondary" : "ghost"}
-              size="icon"
-              className="h-7 w-7"
-              onClick={() => handleViewMode(mode)}
-              title={title}
-            >
-              {icon}
-            </Button>
+            <Tooltip key={mode}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={viewMode === mode ? "secondary" : "ghost"}
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => handleViewMode(mode)}
+                >
+                  {icon}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{title}</TooltipContent>
+            </Tooltip>
           ))}
         </div>
       </div>
@@ -434,7 +445,7 @@ export default function JobsPage() {
                   return (
                     <div
                       key={job.id}
-                      className={`grid ${GRID} ${ROW_CELLS} divide-x divide-border/20 ${compact ? "[&>*]:py-1" : "[&>*]:py-2.5"} ${selected.has(job.id) ? "bg-accent/40" : ""}`}
+                      className={`grid ${GRID} ${ROW_CELLS} divide-x divide-border/20 transition-colors ${compact ? "[&>*]:py-1" : "[&>*]:py-2.5"} ${selected.has(job.id) ? "bg-accent/40" : "hover:bg-muted/40"}`}
                     >
                       {/* Checkbox */}
                       <div className="flex items-center justify-center">
