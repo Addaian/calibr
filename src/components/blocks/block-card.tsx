@@ -86,8 +86,11 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
     }
   }
 
-  // ─── 3D tilt on mouse move ───────────────────────────────────────────────────
+  // ─── 3D tilt on mouse move (disabled for reduced motion) ─────────────────────
+  const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion) return;
     const el = cardRef.current;
     if (!el) return;
 

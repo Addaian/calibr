@@ -121,7 +121,7 @@ export default function ResumesPage() {
 
         {/* ── Resumes Tab ── */}
         <TabsContent value="resumes" className="mt-6 space-y-6">
-          <h1 className="text-2xl font-bold">Resumes</h1>
+          <h2 className="text-2xl font-bold">Resumes</h2>
 
           {resumesError && (
             <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -192,7 +192,7 @@ export default function ResumesPage() {
 
         {/* ── Cover Letters Tab ── */}
         <TabsContent value="cover-letters" className="mt-6 space-y-6">
-          <h1 className="text-2xl font-bold">Cover Letters</h1>
+          <h2 className="text-2xl font-bold">Cover Letters</h2>
 
           {clError && (
             <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">

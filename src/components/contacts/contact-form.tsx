@@ -109,11 +109,11 @@ export function ContactForm({ open, onOpenChange, contact, defaultJobId, onSaved
 
         <div className="space-y-4 py-4">
           <div className="space-y-1.5">
-            <Label className="text-xs">Name *</Label>
+            <Label className="text-xs">Name <span className="text-destructive">*</span></Label>
             <Input value={f.name} onChange={e => set("name", e.target.value)} placeholder="Jane Smith" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs">Company</Label>
               <Input value={f.company} onChange={e => set("company", e.target.value)} placeholder="Acme Corp" />
@@ -124,7 +124,7 @@ export function ContactForm({ open, onOpenChange, contact, defaultJobId, onSaved
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs">Email</Label>
               <Input type="email" value={f.email} onChange={e => set("email", e.target.value)} placeholder="jane@example.com" />

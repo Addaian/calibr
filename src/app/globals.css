@@ -223,3 +223,18 @@ html.theme-transition *::after {
 .dark .bg-dot-pattern {
   background-image: radial-gradient(oklch(1 0 0 / 0.03) 1px, transparent 1px);
 }
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-header-in,
+  .animate-shimmer,
+  .animate-check-pop {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .hover-lift:hover {
+    transform: none !important;
+  }
+}

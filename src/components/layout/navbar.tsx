@@ -142,7 +142,7 @@ export function Navbar() {
                 <item.icon className="h-3.5 w-3.5" />
                 {item.label}
                 <NavBadge count={navCounts[item.href] ?? 0} />
-                {active && <span className="absolute -bottom-px left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-muted-foreground/50" />}
+                {active && <span className="absolute -bottom-px left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-primary/70" />}
               </Link>
             );
           })}
