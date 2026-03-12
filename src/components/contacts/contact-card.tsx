@@ -12,7 +12,7 @@ interface ContactCardProps {
 const BORDER_COLORS = ["border-l-blue-500","border-l-violet-500","border-l-amber-500","border-l-green-500","border-l-rose-500"];
 
 export function ContactCard({ contact, jobTitle, onClick }: ContactCardProps) {
-  const borderColor = BORDER_COLORS[contact.name.charCodeAt(0) % BORDER_COLORS.length];
+  const borderColor = BORDER_COLORS[(contact.name.charCodeAt(0) || 0) % BORDER_COLORS.length];
 
   function fmtDate(d: string | null) {
     if (!d) return null;

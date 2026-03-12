@@ -152,9 +152,8 @@ export function BlockCard({ block, onDelete }: BlockCardProps) {
                 variant="ghost"
                 size="icon-xs"
                 asChild
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
               >
-                <Link href={`/blocks/${block.id}/edit`}>
+                <Link href={`/blocks/${block.id}/edit`} onClick={(e) => e.stopPropagation()}>
                   <Pencil />
                 </Link>
               </Button>
