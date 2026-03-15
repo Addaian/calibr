@@ -42,6 +42,10 @@ export default function ImportPage() {
       toast.error("Only PDF files are supported");
       return;
     }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File must be under 5MB");
+      return;
+    }
 
     setFileName(file.name.replace(/\.pdf$/i, ""));
     setParsing(true);
@@ -98,7 +102,10 @@ export default function ImportPage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ...block, sort_order: i }),
-          }).then((r) => r.json())
+          }).then(async (r) => {
+            if (!r.ok) throw new Error("Failed to save a block");
+            return r.json();
+          })
         )
       );
 
@@ -106,7 +113,7 @@ export default function ImportPage() {
         .filter((r) => r?.id)
         .map((r) => r.id as string);
 
-      await fetch("/api/resumes", {
+      const resumeRes = await fetch("/api/resumes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -117,6 +124,7 @@ export default function ImportPage() {
           template: "classic",
         }),
       });
+      if (!resumeRes.ok) throw new Error("Failed to create resume");
 
       toast.success(`Saved ${toSave.length} blocks`);
       router.push("/resumes");

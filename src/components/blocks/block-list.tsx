@@ -156,25 +156,33 @@ export function BlockList({ blocks, onDelete, onReorder }: BlockListProps) {
       {filterTabs.map((tab) => (
         <TabsContent key={tab.value} value={tab.value}>
           {filteredBlocks.length === 0 ? empty : view === "grid" ? (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredBlocks.map((block) => (
-                <div
-                  key={block.id}
-                  draggable={!!onReorder && activeTab === "all"}
-                  onDragStart={() => handleDragStart(block.id)}
-                  onDragOver={(e) => handleDragOver(e, block.id)}
-                  onDrop={() => handleDrop(block.id)}
-                  onDragEnd={handleDragEnd}
-                  className={`group/drag relative overflow-hidden rounded-xl transition-all duration-150 ${
-                    dragOverId === block.id
-                      ? "scale-[1.02] ring-2 ring-primary/30"
-                      : ""
-                  } ${onReorder && activeTab === "all" ? "cursor-grab active:cursor-grabbing" : ""}`}
-                >
-                  <BlockCard block={block} onDelete={onDelete} />
-                </div>
-              ))}
-            </div>
+            onReorder && activeTab === "all" ? (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredBlocks.map((block) => (
+                  <div
+                    key={block.id}
+                    draggable
+                    onDragStart={() => handleDragStart(block.id)}
+                    onDragOver={(e) => handleDragOver(e, block.id)}
+                    onDrop={() => handleDrop(block.id)}
+                    onDragEnd={handleDragEnd}
+                    className={`group/drag relative overflow-hidden rounded-xl transition-all duration-150 cursor-grab active:cursor-grabbing ${
+                      dragOverId === block.id ? "scale-[1.02] ring-2 ring-primary/30" : ""
+                    }`}
+                  >
+                    <BlockCard block={block} onDelete={onDelete} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="columns-1 gap-4 md:columns-2 lg:columns-3">
+                {filteredBlocks.map((block) => (
+                  <div key={block.id} className="break-inside-avoid mb-4">
+                    <BlockCard block={block} onDelete={onDelete} />
+                  </div>
+                ))}
+              </div>
+            )
           ) : (
             <div className="divide-y rounded-lg border">
               {filteredBlocks.map((block) => {

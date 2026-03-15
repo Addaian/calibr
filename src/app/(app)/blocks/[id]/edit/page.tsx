@@ -18,7 +18,7 @@ export default function EditBlockPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const { data: block, isLoading } = useSWR<ExperienceBlock>(
+  const { data: block, isLoading, error } = useSWR<ExperienceBlock>(
     `/api/blocks/${params.id}`,
     fetcher
   );
@@ -71,6 +71,10 @@ export default function EditBlockPage() {
           </div>
           <Skeleton className="h-24 w-full" />
           <Skeleton className="h-10 w-32" />
+        </div>
+      ) : error ? (
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          Failed to load block. It may not exist or you may not have access.
         </div>
       ) : block ? (
         <BlockForm initialData={block} onSubmit={handleSubmit} loading={loading} />

@@ -176,6 +176,11 @@ export function BlockForm({ initialData, onSubmit, loading }: BlockFormProps) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    if (startDate && endDate && !currentRole && endDate < startDate) {
+      toast.error("End date must be after start date");
+      return;
+    }
+
     const metadata: Record<string, unknown> = {};
 
     if (type === "education") {

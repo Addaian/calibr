@@ -31,7 +31,8 @@ export default function BlocksPage() {
     const id = deleteTarget.id;
     setDeleteTarget(null);
     try {
-      await fetch(`/api/blocks/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/blocks/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete block");
       mutate((prev) => prev?.filter((b) => b.id !== id));
       toast.success("Block deleted");
     } catch {
